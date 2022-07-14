@@ -1,12 +1,15 @@
-package kz.halykacademy.bookstore.interfaces;
+package kz.halykacademy.bookstore.services;
 
 import kz.halykacademy.bookstore.models.Publisher;
 
-public interface PublisherProvider extends ImplPublisher<Publisher> {
+import java.util.List;
 
+public interface PublisherService {
     void create(Publisher publisher);
 
     Publisher readById(Long id);
+
+    List<Publisher> readAll();
 
     void update(Long id);
 
