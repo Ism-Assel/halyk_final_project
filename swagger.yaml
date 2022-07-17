@@ -57,6 +57,30 @@ paths:
         "405":
           description: "Invalid input"
 
+    put:
+      tags:
+        - "book"
+      summary: "Update a book to the store"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Book object that needs to be updated to the store"
+          required: true
+          schema:
+            $ref: "#/definitions/Book"
+      responses:
+        "200":
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Book"
+        "405":
+          description: "Invalid input"
+
   /books/{bookID}:
     get:
       tags:
@@ -80,33 +104,6 @@ paths:
         "404":
           description: "Book not found"
 
-    put:
-      tags:
-        - "book"
-      summary: "Updates a book in the store"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "bookID"
-          in: "path"
-          description: "ID of book that needs to be updated"
-          required: true
-          type: "integer"
-          format: "int64"
-        - in: "body"
-          name: "body"
-          description: "Book object that needs to be updated to the store"
-          required: true
-          schema:
-            $ref: "#/definitions/Book"
-      responses:
-        "200":
-          description: "Successful operation"
-          schema:
-            $ref: "#/definitions/Book"
-        "405":
-          description: "Invalid input"
-
     delete:
       tags:
         - "book"
@@ -124,6 +121,33 @@ paths:
       responses:
         "404":
           description: "Book not found"
+
+  /books/findByTitle:
+    get:
+      tags:
+        - "book"
+      summary: "Finds Book by title"
+      description: "Muliple Book can be provided with comma separated strings."
+      produces:
+        - "application/json"
+      parameters:
+        - name: "title"
+          in: "query"
+          description: "Title to filter by"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+          collectionFormat: "multi"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Book"
+        "400":
+          description: "Invalid name value"
 
   /authors:
     get:
@@ -169,6 +193,30 @@ paths:
         "405":
           description: "Invalid input"
 
+    put:
+      tags:
+        - "author"
+      summary: "Update a author to the store"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Author object that needs to be updated to the store"
+          required: true
+          schema:
+            $ref: "#/definitions/Author"
+      responses:
+        "200":
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Author"
+        "405":
+          description: "Invalid input"
+
   /authors/{authorID}:
     get:
       tags:
@@ -192,55 +240,6 @@ paths:
         "404":
           description: "Author not found"
 
-    put:
-      tags:
-        - "author"
-      summary: "Updates a author in the store with form data"
-      description: ""
-      consumes:
-        - "application/x-www-form-urlencoded"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "authorID"
-          in: "path"
-          description: "ID of book that needs to be updated"
-          required: true
-          type: "integer"
-          format: "int64"
-        - name: "name"
-          in: "formData"
-          description: "Updated title of the book"
-          required: false
-          type: "string"
-        - name: "surname"
-          in: "formData"
-          description: "Updated publisher of the book"
-          required: false
-          type: "string"
-        - name: "lastname"
-          in: "formData"
-          description: "Updated number of pages of the book"
-          required: false
-          type: "string"
-        - name: "dateOfBirth"
-          in: "formData"
-          description: "Updated year of the book"
-          required: false
-          type: "integer"
-        - name: "books"
-          in: "formData"
-          description: "Updated listBook of the book"
-          required: false
-          type: "string"
-      responses:
-        "200":
-          description: "Successful operation"
-          schema:
-            $ref: "#/definitions/Author"
-        "405":
-          description: "Invalid input"
-
     delete:
       tags:
         - "author"
@@ -258,6 +257,33 @@ paths:
       responses:
         "404":
           description: "Book not found"
+
+  /authors/findByFio:
+    get:
+      tags:
+        - "author"
+      summary: "Finds Author by fio"
+      description: "Muliple author can be provided with comma separated strings."
+      produces:
+        - "application/json"
+      parameters:
+        - name: "fio"
+          in: "query"
+          description: "Fio to filter by"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+          collectionFormat: "multi"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Author"
+        "400":
+          description: "Invalid name value"
 
   /publishers:
     get:
@@ -303,6 +329,29 @@ paths:
         "405":
           description: "Invalid input"
 
+    put:
+      tags:
+        - "publisher"
+      summary: "Update a publisher to the store"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Publisher object that needs to be updated to the store"
+          required: true
+          schema:
+            $ref: "#/definitions/Publisher"
+      responses:
+        "200":
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/Publisher"
+        "405":
+          description: "Invalid input"
 
   /publishers/{publisherID}:
     get:
@@ -327,35 +376,6 @@ paths:
         "404":
           description: "Author not found"
 
-    put:
-      tags:
-        - "publisher"
-      summary: "Updated publisher"
-      description: ""
-      produces:
-        - "application/json"
-      parameters:
-        - name: "publisherID"
-          in: "path"
-          description: "ID of publisher that needs to be updated"
-          required: true
-          type: "integer"
-        - in: "body"
-          name: "body"
-          description: "Updated publisher object"
-          required: true
-          schema:
-            $ref: "#/definitions/Publisher"
-      responses:
-        "200":
-          description: "Successful operation"
-          schema:
-            $ref: "#/definitions/Publisher"
-        "400":
-          description: "Invalid user supplied"
-        "404":
-          description: "Publisher not found"
-
     delete:
       tags:
         - "publisher"
@@ -373,6 +393,33 @@ paths:
       responses:
         "404":
           description: "Book not found"
+
+  /publishers/findByName:
+    get:
+      tags:
+        - "publisher"
+      summary: "Finds Publisher by name"
+      description: "Muliple publisher can be provided with comma separated strings."
+      produces:
+        - "application/json"
+      parameters:
+        - name: "name"
+          in: "query"
+          description: "Name to filter by"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+          collectionFormat: "multi"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Publisher"
+        "400":
+          description: "Invalid name value"
 
 definitions:
   Book:
@@ -438,12 +485,3 @@ definitions:
 externalDocs:
   description: "Find out more about Swagger"
   url: "http://swagger.io"
-
-
-
-
-
-
-
-
-
