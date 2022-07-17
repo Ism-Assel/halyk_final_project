@@ -11,7 +11,9 @@ public interface PublisherService {
 
     List<Publisher> readAll();
 
-    void update(Long id);
+    void update(Long id, Publisher updatedPublisher);
 
     void delete(Long id);
+
+    List<Publisher> findByNameLike(String name);
 }

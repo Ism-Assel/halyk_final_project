@@ -1,12 +1,10 @@
 package kz.halykacademy.bookstore.dto;
 
-import java.util.List;
-
 public class AuthorDTO {
     private Long id;
     private String name;
     private String surname;
-    private List<BookDTO> books;
+//    private List<BookDTO> books;
 
     public AuthorDTO() {
     }
@@ -35,11 +33,11 @@ public class AuthorDTO {
         this.surname = surname;
     }
 
-    public List<BookDTO> getBooks() {
-        return books;
-    }
-
-    public void setBooks(List<BookDTO> books) {
-        this.books = books;
-    }
+//    public List<BookDTO> getBooks() {
+//        return books;
+//    }
+//
+//    public void setBooks(List<BookDTO> books) {
+//        this.books = books;
+//    }
 }

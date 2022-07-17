@@ -4,6 +4,7 @@ import kz.halykacademy.bookstore.dto.AuthorDTO;
 import kz.halykacademy.bookstore.models.Author;
 import kz.halykacademy.bookstore.services.AuthorService;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class AuthorController {
     private final AuthorService authorService;
     private final ModelMapper modelMapper;
 
+    @Autowired
     public AuthorController(AuthorService authorService, ModelMapper modelMapper) {
         this.authorService = authorService;
         this.modelMapper = modelMapper;

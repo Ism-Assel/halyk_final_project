@@ -44,9 +44,9 @@ public class PublisherController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity put(@PathVariable(name = "id") Long id) {
-        publisherService.update(id);
+    @PutMapping
+    public ResponseEntity put(@RequestBody PublisherDTO publisherDTO) {
+        publisherService.update(publisherDTO.getId(), convertToPublisher(publisherDTO));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -62,5 +62,11 @@ public class PublisherController {
 
     private Publisher convertToPublisher(PublisherDTO publisherDTO) {
         return modelMapper.map(publisherDTO, Publisher.class);
+    }
+
+    @GetMapping("/{name}")
+    public List<Publisher> getByName(@PathVariable(name = "name") String name){
+        return publisherService.findByNameLike(name);
+
     }
 }
