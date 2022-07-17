@@ -1,44 +1,55 @@
 package kz.halykacademy.bookstore.services.impl;
 
-import kz.halykacademy.bookstore.interfaces.AuthorProvider;
 import kz.halykacademy.bookstore.models.Author;
+import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.services.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class AuthorServiceImpl implements AuthorService {
-    private final AuthorProvider authorProvider;
+    private final AuthorRepository authorRepository;
 
     @Autowired
-    public AuthorServiceImpl(AuthorProvider authorProvider) {
-        this.authorProvider = authorProvider;
+    public AuthorServiceImpl(AuthorRepository authorRepository) {
+        this.authorRepository = authorRepository;
     }
 
     @Override
     public void create(Author author) {
-        authorProvider.create(author);
+        authorRepository.save(author);
     }
 
     @Override
     public Author readById(Long id) {
-        return authorProvider.readById(id);
+        return authorRepository.findById(id).orElse(null);
     }
 
     @Override
     public List<Author> readAll() {
-        return authorProvider.getAll();
+        return authorRepository.findAll();
     }
 
     @Override
-    public void update(Long id) {
-        authorProvider.update(id);
+    public void update(Long id, Author updatedAuthor) {
+        Optional<Author> author = authorRepository.findById(id);
+        if (author.isPresent()) {
+            authorRepository.save(updatedAuthor);
+        }
     }
 
     @Override
     public void delete(Long id) {
-        authorProvider.delete(id);
+        authorRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Author> findByNameOrSurnameOrLastnameLike(String fio) {
+        return authorRepository.findByNameOrSurnameOrLastnameLike(fio);
     }
 }

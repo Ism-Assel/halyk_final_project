@@ -42,9 +42,9 @@ public class AuthorController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity put(@PathVariable(name = "id") Long id) {
-        authorService.update(id);
+    @PutMapping()
+    public ResponseEntity put(@RequestBody AuthorDTO authorDTO) {
+        authorService.update(authorDTO.getId(), convertToAuthor(authorDTO));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -53,12 +53,17 @@ public class AuthorController {
         authorService.delete(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
-    
+
     private AuthorDTO convertToAuthorDTO(Author author) {
         return modelMapper.map(author, AuthorDTO.class);
     }
 
     private Author convertToAuthor(AuthorDTO authorDTO) {
         return modelMapper.map(authorDTO, Author.class);
+    }
+
+    @GetMapping("/{fio}")
+    public List<Author> getByFio(@PathVariable(name = "fio") String fio) {
+        return authorService.findByNameOrSurnameOrLastnameLike(fio);
     }
 }

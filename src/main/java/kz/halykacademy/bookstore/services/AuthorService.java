@@ -11,7 +11,9 @@ public interface AuthorService {
 
     List<Author> readAll();
 
-    void update(Long id);
+    void update(Long id, Author updatedAuthor);
 
     void delete(Long id);
+
+    List<Author> findByNameOrSurnameOrLastnameLike(String fio);
 }
