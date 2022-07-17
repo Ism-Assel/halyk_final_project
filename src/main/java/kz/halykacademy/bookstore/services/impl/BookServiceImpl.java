@@ -5,11 +5,13 @@ import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
@@ -44,5 +46,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public void delete(Long id) {
         bookRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Book> findByTitle(String title) {
+        return bookRepository.findByTitleLike(title);
     }
 }

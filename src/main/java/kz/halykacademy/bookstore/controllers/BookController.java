@@ -67,4 +67,9 @@ public class BookController {
         return modelMapper.map(bookDTO, Book.class);
     }
 
+    @GetMapping("/{title}")
+    public List<Book> getByTitle(@PathVariable(name = "title") String title){
+        return bookService.findByTitle(title);
+    }
+
 }
