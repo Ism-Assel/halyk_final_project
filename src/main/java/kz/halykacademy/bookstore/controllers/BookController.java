@@ -45,9 +45,9 @@ public class BookController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity put(@PathVariable(name = "id") Long id){
-        bookService.update(id);
+    @PutMapping
+    public ResponseEntity put(@RequestBody BookDTO bookDTO){
+        bookService.update(bookDTO.getId(), convertToBook(bookDTO));
 
         return ResponseEntity.ok(HttpStatus.OK);
     }

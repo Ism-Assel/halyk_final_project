@@ -11,7 +11,7 @@ public interface BookService {
 
     List<Book> readAllBooks();
 
-    void update(Long id);
+    void update(Long id, Book updatedBook);
 
     void delete(Long id);
 
