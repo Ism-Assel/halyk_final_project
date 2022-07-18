@@ -11,6 +11,7 @@ public class Book {
     private String title;
     private int pages;
     private LocalDate publicationYear;
+    private List<Genre> genres;
 
     public Book() {
     }
@@ -21,7 +22,8 @@ public class Book {
             Publisher publisher,
             String title,
             int pages,
-            LocalDate publicationYear
+            LocalDate publicationYear,
+            List<Genre> genres
     ) {
         this.price = price;
         this.authorList = authorList;
@@ -29,6 +31,7 @@ public class Book {
         this.title = title;
         this.pages = pages;
         this.publicationYear = publicationYear;
+        this.genres = genres;
     }
 
     public Long getId() {
@@ -85,5 +88,13 @@ public class Book {
 
     public void setPublicationYear(LocalDate publicationYear) {
         this.publicationYear = publicationYear;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
     }
 }

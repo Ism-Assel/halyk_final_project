@@ -10,6 +10,7 @@ public class Author {
     private String lastname;
     private LocalDate dateOfBirth;
     private List<Book> books;
+    private List<Genre> genres;
 
     public Author() {
     }
@@ -19,13 +20,15 @@ public class Author {
             String surname,
             String lastname,
             LocalDate dateOfBirth,
-            List<Book> books
+            List<Book> books,
+            List<Genre> genres
     ) {
         this.name = name;
         this.surname = surname;
         this.lastname = lastname;
         this.dateOfBirth = dateOfBirth;
         this.books = books;
+        this.genres = genres;
     }
 
     public Long getId() {
@@ -74,5 +77,13 @@ public class Author {
 
     public void setBooks(List<Book> books) {
         this.books = books;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
     }
 }
