@@ -50,6 +50,8 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<Author> findByNameOrSurnameOrLastnameLike(String fio) {
-        return authorRepository.findByNameOrSurnameOrLastnameLike(fio);
+
+        // todo дописать логику
+        return authorRepository.findByNameOrSurnameOrLastnameLike("", "", "");
     }
 }
