@@ -1,14 +1,35 @@
 package kz.halykacademy.bookstore.models;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
+@Table(name = "author")
 public class Author {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "surname")
     private String surname;
+
+    @Column(name = "lastname")
     private String lastname;
+
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
+    @ManyToMany
+    @JoinTable(
+            name = "author_book",
+            joinColumns = @JoinColumn(name = "author_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id"))
     private List<Book> books;
     private List<Genre> genres;
 

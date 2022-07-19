@@ -1,15 +1,35 @@
 package kz.halykacademy.bookstore.models;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
+@Table(name = "book")
 public class Book {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "price")
     private double price;
+
+    @ManyToMany(mappedBy = "books")
     private List<Author> authorList;
+
+    @ManyToOne
+    @JoinColumn(name = "publisher_id", referencedColumnName = "id")
     private Publisher publisher;
+
+    @Column(name = "title")
     private String title;
+
+    @Column(name = "pages")
     private int pages;
+
+    @Column(name = "publication_year")
     private LocalDate publicationYear;
     private List<Genre> genres;
 
