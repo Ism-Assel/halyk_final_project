@@ -1,10 +1,24 @@
 package kz.halykacademy.bookstore.models;
 
+import org.hibernate.annotations.Cascade;
+
+import javax.persistence.*;
 import java.util.List;
 
+@Entity
+@Table(name = "publisher")
 public class Publisher {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name")
     private String name;
+
+    @OneToMany(mappedBy = "publisher")
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private List<Book> books;
 
     public Publisher() {
