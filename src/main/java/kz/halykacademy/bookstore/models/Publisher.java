@@ -8,7 +8,6 @@ import java.util.List;
 @Entity
 @Table(name = "publisher")
 public class Publisher {
-
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

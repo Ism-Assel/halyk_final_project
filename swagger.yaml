@@ -151,6 +151,33 @@ paths:
         "400":
           description: "Invalid name value"
 
+  /books/findByGenre:
+    get:
+      tags:
+        - "book"
+      summary: "Finds Book by genre"
+      description: "Muliple Book can be provided with comma separated strings."
+      produces:
+        - "application/json"
+      parameters:
+        - name: "genre"
+          in: "query"
+          description: "Genre to filter by"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+          collectionFormat: "multi"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Book"
+        "400":
+          description: "Invalid name value"
+
   /authors:
     get:
       tags:
@@ -272,6 +299,33 @@ paths:
         - name: "fio"
           in: "query"
           description: "Fio to filter by"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+          collectionFormat: "multi"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Author"
+        "400":
+          description: "Invalid name value"
+
+  /authors/findByGenre:
+    get:
+      tags:
+        - "author"
+      summary: "Finds Author by genre"
+      description: "Muliple author can be provided with comma separated strings."
+      produces:
+        - "application/json"
+      parameters:
+        - name: "genre"
+          in: "query"
+          description: "Genre to filter by"
           required: true
           type: "array"
           items:

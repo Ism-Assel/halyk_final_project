@@ -36,7 +36,7 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public void update(Long id, Genre updatedGenre) {
         Optional<Genre> genre = genreRepository.findById(id);
-        if (genre.isPresent()){
+        if (genre.isPresent()) {
             genreRepository.save(updatedGenre);
         }
     }
@@ -45,6 +45,5 @@ public class GenreServiceImpl implements GenreService {
     public void delete(Long id) {
         genreRepository.deleteById(id);
     }
-
 
 }

@@ -38,7 +38,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     public void update(Long id, Publisher updatedPublisher) {
         Optional<Publisher> publisher = publisherRepository.findById(id);
-        if (publisher.isPresent()){
+        if (publisher.isPresent()) {
             publisherRepository.save(updatedPublisher);
         }
     }

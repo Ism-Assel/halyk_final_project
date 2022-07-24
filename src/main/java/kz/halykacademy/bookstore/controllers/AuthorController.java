@@ -2,6 +2,7 @@ package kz.halykacademy.bookstore.controllers;
 
 import kz.halykacademy.bookstore.dto.AuthorDTO;
 import kz.halykacademy.bookstore.models.Author;
+import kz.halykacademy.bookstore.models.Genre;
 import kz.halykacademy.bookstore.services.AuthorService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,5 +68,10 @@ public class AuthorController {
     @GetMapping("/{fio}")
     public List<Author> getByFio(@PathVariable(name = "fio") String fio) {
         return authorService.findByNameOrSurnameOrLastnameLike(fio);
+    }
+
+    @GetMapping("/{genres}")
+    public List<Author> getByGenre(@PathVariable(name = "genres") List<Genre> genres) {
+        return authorService.findByGenresIn(genres);
     }
 }

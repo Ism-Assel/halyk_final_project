@@ -7,7 +7,6 @@ import java.util.List;
 @Entity
 @Table(name = "book")
 public class Book {
-
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +30,8 @@ public class Book {
 
     @Column(name = "publication_year")
     private LocalDate publicationYear;
+
+    @OneToMany(mappedBy = "book")
     private List<Genre> genres;
 
     public Book() {

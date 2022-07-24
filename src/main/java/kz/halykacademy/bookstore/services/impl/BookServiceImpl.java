@@ -1,6 +1,7 @@
 package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.models.Book;
+import kz.halykacademy.bookstore.models.Genre;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book readById(Long id) {
-        return  bookRepository.findById(id).orElse(null);
+        return bookRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public void update(Long id, Book updatedBook) {
         Optional<Book> book = bookRepository.findById(id);
-        if (book.isPresent()){
+        if (book.isPresent()) {
             bookRepository.save(updatedBook);
         }
     }
@@ -51,5 +52,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<Book> findByTitle(String title) {
         return bookRepository.findByTitleLike(title);
+    }
+
+    @Override
+    public List<Book> findByGenres(List<Genre> genres) {
+        return bookRepository.findBookByGenresList(genres);
     }
 }

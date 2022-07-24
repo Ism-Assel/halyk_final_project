@@ -7,7 +7,6 @@ import java.util.List;
 @Entity
 @Table(name = "author")
 public class Author {
-
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +30,8 @@ public class Author {
             joinColumns = @JoinColumn(name = "author_id"),
             inverseJoinColumns = @JoinColumn(name = "book_id"))
     private List<Book> books;
+
+    @OneToMany(mappedBy = "author")
     private List<Genre> genres;
 
     public Author() {

@@ -1,6 +1,7 @@
 package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.models.Author;
+import kz.halykacademy.bookstore.models.Genre;
 import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.services.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,10 @@ public class AuthorServiceImpl implements AuthorService {
 
         // todo дописать логику
         return authorRepository.findByNameOrSurnameOrLastnameLike("", "", "");
+    }
+
+    @Override
+    public List<Author> findByGenresIn(List<Genre> genres) {
+        return authorRepository.findAuthorByGenresList(genres);
     }
 }
