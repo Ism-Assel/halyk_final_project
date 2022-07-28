@@ -1,0 +1,1 @@
+alter table user_ rename column is_admin to is_blocked;

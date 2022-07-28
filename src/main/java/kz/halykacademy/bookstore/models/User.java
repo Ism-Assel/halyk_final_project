@@ -19,17 +19,17 @@ public class User {
     @Column(name = "role")
     private String role;
 
-    @Column(name = "is_admin")
-    private boolean isAdmin;
+    @Column(name = "is_blocked")
+    private boolean isBlocked;
 
     public User() {
     }
 
-    public User(String login, String password, String role, boolean isAdmin) {
+    public User(String login, String password, String role, boolean isBlocked) {
         this.login = login;
         this.password = password;
         this.role = role;
-        this.isAdmin = isAdmin;
+        this.isBlocked = isBlocked;
     }
 
     public Long getId() {
@@ -64,11 +64,11 @@ public class User {
         this.role = role;
     }
 
-    public boolean isAdmin() {
-        return isAdmin;
+    public boolean isBlocked() {
+        return isBlocked;
     }
 
-    public void setAdmin(boolean admin) {
-        isAdmin = admin;
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
     }
 }
