@@ -1,17 +1,17 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.models.User;
+import kz.halykacademy.bookstore.dto.UserDTO;
 
 import java.util.List;
 
 public interface UserService {
-    void create(User user);
+    void create(UserDTO userDTO);
 
-    User readById(Long id);
+    UserDTO readById(Long id);
 
-    List<User> readAll();
+    List<UserDTO> readAll();
 
-    void update(Long id, User updatedUser);
+    void update(Long id, UserDTO updatedUserDTO);
 
     void delete(Long id);
 }

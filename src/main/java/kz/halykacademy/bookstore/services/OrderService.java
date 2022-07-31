@@ -1,17 +1,17 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.models.Order;
+import kz.halykacademy.bookstore.dto.OrderDTO;
 
 import java.util.List;
 
 public interface OrderService {
-    void create(Order order);
+    void create(OrderDTO orderDTO);
 
-    Order readById(Long id);
+    OrderDTO readById(Long id);
 
-    List<Order> readAll();
+    List<OrderDTO> readAll();
 
-    void update(Long id, Order updatedOrder);
+    void update(Long id, OrderDTO updatedOrderDTO);
 
     void delete(Long id);
 }

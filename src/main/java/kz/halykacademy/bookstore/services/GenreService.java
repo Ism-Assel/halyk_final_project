@@ -1,17 +1,17 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.models.Genre;
+import kz.halykacademy.bookstore.dto.GenreDTO;
 
 import java.util.List;
 
 public interface GenreService {
-    void create(Genre genre);
+    void create(GenreDTO genreDTO);
 
-    Genre readById(Long id);
+    GenreDTO readById(Long id);
 
-    List<Genre> readAllGenres();
+    List<GenreDTO> readAllGenres();
 
-    void update(Long id, Genre updatedGenre);
+    void update(Long id, GenreDTO updatedGenreDTO);
 
     void delete(Long id);
 }

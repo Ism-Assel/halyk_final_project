@@ -1,23 +1,23 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.models.Book;
-import kz.halykacademy.bookstore.models.Genre;
+import kz.halykacademy.bookstore.dto.BookDTO;
+import kz.halykacademy.bookstore.dto.GenreDTO;
 
 import java.util.List;
 
 public interface BookService {
-    void create(Book book);
+    void create(BookDTO bookDTO);
 
-    Book readById(Long id);
+    BookDTO readById(Long id);
 
-    List<Book> readAllBooks();
+    List<BookDTO> readAllBooks();
 
-    void update(Long id, Book updatedBook);
+    void update(Long id, BookDTO updatedBookDTO);
 
     void delete(Long id);
 
-    List<Book> findByTitle(String title);
+    List<BookDTO> findByTitle(String title);
 
-    List<Book> findByGenres(List<Genre> genres);
+    List<BookDTO> findByGenres(List<GenreDTO> genres);
 
 }

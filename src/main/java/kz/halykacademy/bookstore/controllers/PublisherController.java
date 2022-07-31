@@ -1,52 +1,43 @@
 package kz.halykacademy.bookstore.controllers;
 
 import kz.halykacademy.bookstore.dto.PublisherDTO;
-import kz.halykacademy.bookstore.models.Publisher;
 import kz.halykacademy.bookstore.services.PublisherService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/publishers")
 public class PublisherController {
     private final PublisherService publisherService;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public PublisherController(PublisherService publisherService, ModelMapper modelMapper) {
+    public PublisherController(PublisherService publisherService) {
         this.publisherService = publisherService;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping
     public List<PublisherDTO> getAll() {
-        return publisherService
-                .readAll()
-                .stream()
-                .map(this::convertToPublisherDTO)
-                .collect(Collectors.toList());
+        return publisherService.readAll();
     }
 
     @GetMapping("/{id}")
     public PublisherDTO getById(@PathVariable(name = "id") Long id) {
-        return convertToPublisherDTO(publisherService.readById(id));
+        return publisherService.readById(id);
     }
 
     @PostMapping
     public ResponseEntity post(@RequestBody PublisherDTO publisherDTO) {
-        publisherService.create(convertToPublisher(publisherDTO));
+        publisherService.create(publisherDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PutMapping
     public ResponseEntity put(@RequestBody PublisherDTO publisherDTO) {
-        publisherService.update(publisherDTO.getId(), convertToPublisher(publisherDTO));
+        publisherService.update(publisherDTO.getId(), publisherDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -56,16 +47,8 @@ public class PublisherController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    private PublisherDTO convertToPublisherDTO(Publisher publisher) {
-        return modelMapper.map(publisher, PublisherDTO.class);
-    }
-
-    private Publisher convertToPublisher(PublisherDTO publisherDTO) {
-        return modelMapper.map(publisherDTO, Publisher.class);
-    }
-
     @GetMapping("/{name}")
-    public List<Publisher> getByName(@PathVariable(name = "name") String name){
+    public List<PublisherDTO> getByName(@PathVariable(name = "name") String name) {
         return publisherService.findByNameLike(name);
 
     }

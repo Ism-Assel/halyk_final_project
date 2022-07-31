@@ -1,46 +1,54 @@
 package kz.halykacademy.bookstore.services.impl;
 
+import kz.halykacademy.bookstore.dto.BookDTO;
+import kz.halykacademy.bookstore.dto.GenreDTO;
 import kz.halykacademy.bookstore.models.Book;
-import kz.halykacademy.bookstore.models.Genre;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.services.BookService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public BookServiceImpl(BookRepository bookRepository) {
+    public BookServiceImpl(BookRepository bookRepository, ModelMapper modelMapper) {
         this.bookRepository = bookRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public void create(Book book) {
-        bookRepository.save(book);
+    public void create(BookDTO bookDTO) {
+        bookRepository.save(convertToBook(bookDTO));
     }
 
     @Override
-    public Book readById(Long id) {
-        return bookRepository.findById(id).orElse(null);
+    public BookDTO readById(Long id) {
+        return convertToBookDTO(bookRepository.findById(id).orElse(null));
     }
 
     @Override
-    public List<Book> readAllBooks() {
-        return bookRepository.findAll();
+    public List<BookDTO> readAllBooks() {
+        return bookRepository.findAll()
+                .stream()
+                .map(this::convertToBookDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void update(Long id, Book updatedBook) {
+    public void update(Long id, BookDTO updatedBookDTO) {
         Optional<Book> book = bookRepository.findById(id);
         if (book.isPresent()) {
-            bookRepository.save(updatedBook);
+            bookRepository.save(convertToBook(updatedBookDTO));
         }
     }
 
@@ -50,12 +58,26 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<Book> findByTitle(String title) {
-        return bookRepository.findByTitleLike(title);
+    public List<BookDTO> findByTitle(String title) {
+        return bookRepository
+                .findByTitleLike(title)
+                .stream()
+                .map(this::convertToBookDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Book> findByGenres(List<Genre> genres) {
-        return bookRepository.findBookByGenresList(genres);
+    public List<BookDTO> findByGenres(List<GenreDTO> genres) {
+        // todo ипсравить
+//        return bookRepository.findBookByGenresList(genres);
+        return null;
+    }
+
+    private BookDTO convertToBookDTO(Book book) {
+        return modelMapper.map(book, BookDTO.class);
+    }
+
+    private Book convertToBook(BookDTO bookDTO) {
+        return modelMapper.map(bookDTO, Book.class);
     }
 }
