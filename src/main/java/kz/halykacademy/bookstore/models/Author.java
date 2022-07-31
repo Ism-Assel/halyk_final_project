@@ -33,7 +33,7 @@ public class Author {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "author_book",
             joinColumns = @JoinColumn(name = "author_id"),

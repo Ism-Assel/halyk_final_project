@@ -7,8 +7,12 @@ import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.services.AuthorService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,33 +31,112 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public void create(AuthorDTO authorDTO) {
-        authorRepository.save(convertToAuthor(authorDTO));
-    }
+    public ResponseEntity create(AuthorDTO authorDTO) {
+        String message;
 
-    @Override
-    public AuthorDTO readById(Long id) {
-        return convertToAuthorDTO(authorRepository.findById(id).orElse(null));
-    }
+        try {
+            // проверка параметров запроса
+            checkParameters(authorDTO);
 
-    @Override
-    public List<AuthorDTO> readAll() {
-        return authorRepository.findAll().stream()
-                .map(this::convertToAuthorDTO)
-                .collect(Collectors.toList());
-    }
+            // конвертирование DTO в Entity
+            Author author = convertToAuthor(authorDTO);
 
-    @Override
-    public void update(Long id, AuthorDTO updatedAuthorDTO) {
-        Optional<Author> author = authorRepository.findById(id);
-        if (author.isPresent()) {
-            authorRepository.save(convertToAuthor(updatedAuthorDTO));
+            // Поиск автора в БД
+            Author foundAuthor = authorRepository
+                    .findAuthorByNameAndSurnameAndLastname(
+                            author.getName(),
+                            author.getSurname(),
+                            author.getLastname());
+
+            // Проверка существует ли автор
+            if (foundAuthor == null) {
+                // если нет, то создаем
+                authorRepository.save(author);
+                message = "success";
+                return new ResponseEntity(message, HttpStatus.OK);
+
+            } else {
+                // иначе выводим сообщение пользователю
+                message = "This author is existed";
+                return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+            }
+
+        } catch (Exception e) {
+            message = "Internal Server Error: " + e.getMessage();
+            return new ResponseEntity(message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
-    public void delete(Long id) {
-        authorRepository.deleteById(id);
+    public ResponseEntity readById(Long id) {
+        try {
+            // Поиск автора по id
+            Optional<Author> authorById = authorRepository.findById(id);
+
+            if (authorById.isEmpty()) {
+                // Если не найден автор
+                return new ResponseEntity("Author is not found", HttpStatus.BAD_REQUEST);
+            }
+
+            AuthorDTO authorDTO = convertToAuthorRequest(authorById.get());
+            return new ResponseEntity(authorDTO, HttpStatus.OK);
+
+        } catch (Exception e) {
+            String message = "Internal Server Error: " + e.getMessage();
+            return new ResponseEntity(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public List<AuthorDTO> readAll() {
+        return authorRepository
+                .findAll()
+                .stream()
+                .map(this::convertToAuthorRequest)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ResponseEntity update(Long id, AuthorDTO updatedAuthorDTO) {
+        String message;
+
+        try {
+            // проверка параметров запроса
+            checkParameters(id, updatedAuthorDTO);
+
+            // Поиск автора по id
+            Optional<Author> author = authorRepository.findById(id);
+            if (author.isPresent()) {
+                // Если найден, обновляем автора
+                authorRepository.save(convertToAuthor(updatedAuthorDTO));
+                message = "successfully updated";
+                return new ResponseEntity(message, HttpStatus.OK);
+
+            } else {
+                // иначе выводим сообщение пользователю
+                message = "Author is not found";
+                return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+            }
+
+        } catch (Exception e) {
+            message = "Internal Server Error: " + e.getMessage();
+            return new ResponseEntity(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseEntity delete(Long id) {
+        try {
+            Assert.notNull(id, "Id is undefined");
+
+            authorRepository.deleteById(id);
+
+            return new ResponseEntity("success", HttpStatus.OK);
+
+        } catch (Exception e) {
+            String message = "Internal Server Error: " + e.getMessage();
+            return new ResponseEntity(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
@@ -62,7 +145,7 @@ public class AuthorServiceImpl implements AuthorService {
         return authorRepository
                 .findByNameOrSurnameOrLastnameLike("", "", "")
                 .stream()
-                .map(this::convertToAuthorDTO)
+                .map(this::convertToAuthorRequest)
                 .collect(Collectors.toList());
     }
 
@@ -73,11 +156,29 @@ public class AuthorServiceImpl implements AuthorService {
         return null;
     }
 
-    private AuthorDTO convertToAuthorDTO(Author author) {
+    private AuthorDTO convertToAuthorRequest(Author author) {
         return modelMapper.map(author, AuthorDTO.class);
     }
 
     private Author convertToAuthor(AuthorDTO authorDTO) {
         return modelMapper.map(authorDTO, Author.class);
     }
+
+    protected void checkParameters(Long id, AuthorDTO authorDTO) {
+        Assert.notNull(id, "Id is undefined");
+        checkParameters(authorDTO);
+    }
+
+    protected void checkParameters(AuthorDTO authorDTO) {
+        notNull(authorDTO.getName(), "Name is undefined");
+        notNull(authorDTO.getSurname(), "Surname is undefined");
+        Assert.notNull(authorDTO.getDateOfBirth(), "Date of birth is undefined");
+    }
+
+    public static void notNull(@Nullable String object, String message) {
+        if (object == null || object.equals("")) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
 }

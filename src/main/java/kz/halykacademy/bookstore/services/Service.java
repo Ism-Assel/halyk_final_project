@@ -1,15 +1,17 @@
 package kz.halykacademy.bookstore.services;
 
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 
 public interface Service<T> {
-    void create(T dto);
+    ResponseEntity create(T dto);
 
-    T readById(Long id);
+    ResponseEntity readById(Long id);
 
     List<T> readAll();
 
-    void update(Long id, T updatedDTO);
+    ResponseEntity update(Long id, T updatedDTO);
 
-    void delete(Long id);
+    ResponseEntity delete(Long id);
 }

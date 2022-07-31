@@ -9,8 +9,8 @@ import java.util.List;
 public class BookDTO {
     private Long id;
     private String title;
-    private double price;
-    private int pages;
+    private Double price;
+    private Integer pages;
     private List<AuthorDTO> authors;
     private PublisherDTO publisher;
     private LocalDate publicationYear;

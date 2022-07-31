@@ -6,6 +6,7 @@ import kz.halykacademy.bookstore.repositories.PublisherRepository;
 import kz.halykacademy.bookstore.services.PublisherService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,13 +27,15 @@ public class PublisherServiceImpl implements PublisherService {
     }
 
     @Override
-    public void create(PublisherDTO publisherDTO) {
+    public ResponseEntity create(PublisherDTO publisherDTO) {
         publisherRepository.save(convertToPublisher(publisherDTO));
+        return null;
     }
 
     @Override
-    public PublisherDTO readById(Long id) {
-        return convertToPublisherDTO(publisherRepository.findById(id).orElse(null));
+    public ResponseEntity readById(Long id) {
+        convertToPublisherDTO(publisherRepository.findById(id).orElse(null));
+        return null;
     }
 
     @Override
@@ -44,16 +47,18 @@ public class PublisherServiceImpl implements PublisherService {
     }
 
     @Override
-    public void update(Long id, PublisherDTO updatedPublisherDTO) {
+    public ResponseEntity update(Long id, PublisherDTO updatedPublisherDTO) {
         Optional<Publisher> publisher = publisherRepository.findById(id);
         if (publisher.isPresent()) {
             publisherRepository.save(convertToPublisher(updatedPublisherDTO));
         }
+        return null;
     }
 
     @Override
-    public void delete(Long id) {
+    public ResponseEntity delete(Long id) {
         publisherRepository.deleteById(id);
+        return null;
     }
 
     @Override

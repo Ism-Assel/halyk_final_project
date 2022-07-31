@@ -7,6 +7,7 @@ import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.services.BookService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,13 +28,15 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void create(BookDTO bookDTO) {
+    public ResponseEntity create(BookDTO bookDTO) {
         bookRepository.save(convertToBook(bookDTO));
+        return null;
     }
 
     @Override
-    public BookDTO readById(Long id) {
-        return convertToBookDTO(bookRepository.findById(id).orElse(null));
+    public ResponseEntity readById(Long id) {
+        convertToBookDTO(bookRepository.findById(id).orElse(null));
+        return null;
     }
 
     @Override
@@ -45,16 +48,18 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void update(Long id, BookDTO updatedBookDTO) {
+    public ResponseEntity update(Long id, BookDTO updatedBookDTO) {
         Optional<Book> book = bookRepository.findById(id);
         if (book.isPresent()) {
             bookRepository.save(convertToBook(updatedBookDTO));
         }
+        return null;
     }
 
     @Override
-    public void delete(Long id) {
+    public ResponseEntity delete(Long id) {
         bookRepository.deleteById(id);
+        return null;
     }
 
     @Override

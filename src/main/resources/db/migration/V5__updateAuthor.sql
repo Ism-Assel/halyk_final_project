@@ -1,0 +1,1 @@
+alter table author alter column date_of_birth type date using to_date(date_of_birth, 'YYYY-MM-DD');

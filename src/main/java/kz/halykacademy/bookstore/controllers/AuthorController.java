@@ -4,7 +4,6 @@ import kz.halykacademy.bookstore.dto.AuthorDTO;
 import kz.halykacademy.bookstore.dto.GenreDTO;
 import kz.halykacademy.bookstore.services.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,27 +24,24 @@ public class AuthorController {
         return authorService.readAll();
     }
 
-    @GetMapping("/{id}")
-    public AuthorDTO getById(@PathVariable(name = "id") Long id) {
+    @GetMapping("/get")
+    public ResponseEntity getById(@RequestParam(name = "id") Long id) {
         return authorService.readById(id);
     }
 
     @PostMapping
     public ResponseEntity post(@RequestBody AuthorDTO authorDTO) {
-        authorService.create(authorDTO);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return authorService.create(authorDTO);
     }
 
     @PutMapping()
     public ResponseEntity put(@RequestBody AuthorDTO authorDTO) {
-        authorService.update(authorDTO.getId(), authorDTO);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return authorService.update(authorDTO.getId(), authorDTO);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable(name = "id") Long id) {
-        authorService.delete(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return authorService.delete(id);
     }
 
     @GetMapping("/{fio}")

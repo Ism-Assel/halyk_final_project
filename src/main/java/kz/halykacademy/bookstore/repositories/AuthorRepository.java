@@ -17,4 +17,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Query(value = "select a from Author a join a.genres g where g.name in :genres order by g.name ")
     List<Author> findAuthorByGenresList(@Param("genres") Collection<Genre> genres);
+
+    Author findAuthorByNameAndSurnameAndLastname(String name, String surname, String lastname);
 }

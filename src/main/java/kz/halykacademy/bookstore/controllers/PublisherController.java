@@ -25,8 +25,9 @@ public class PublisherController {
     }
 
     @GetMapping("/{id}")
-    public PublisherDTO getById(@PathVariable(name = "id") Long id) {
-        return publisherService.readById(id);
+    public ResponseEntity getById(@PathVariable(name = "id") Long id) {
+        publisherService.readById(id);
+        return null;
     }
 
     @PostMapping

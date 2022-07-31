@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -38,7 +37,7 @@ public class Book {
     private int pages;
 
     @Column(name = "publication_year")
-    private LocalDate publicationYear;
+    private String publicationYear;
 
     @OneToMany(mappedBy = "book")
     private List<Genre> genres;
