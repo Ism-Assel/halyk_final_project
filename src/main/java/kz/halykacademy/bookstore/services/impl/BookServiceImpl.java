@@ -37,7 +37,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDTO> readAllBooks() {
+    public List<BookDTO> readAll() {
         return bookRepository.findAll()
                 .stream()
                 .map(this::convertToBookDTO)
