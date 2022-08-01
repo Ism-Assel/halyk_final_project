@@ -3,7 +3,6 @@ package kz.halykacademy.bookstore.controllers;
 import kz.halykacademy.bookstore.dto.PublisherDTO;
 import kz.halykacademy.bookstore.services.PublisherService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,28 +23,24 @@ public class PublisherController {
         return publisherService.readAll();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity getById(@PathVariable(name = "id") Long id) {
-        publisherService.readById(id);
-        return null;
+    @GetMapping("/get")
+    public ResponseEntity getById(@RequestParam(name = "id") Long id) {
+       return publisherService.readById(id);
     }
 
     @PostMapping
     public ResponseEntity post(@RequestBody PublisherDTO publisherDTO) {
-        publisherService.create(publisherDTO);
-        return ResponseEntity.ok(HttpStatus.OK);
+       return publisherService.create(publisherDTO);
     }
 
     @PutMapping
     public ResponseEntity put(@RequestBody PublisherDTO publisherDTO) {
-        publisherService.update(publisherDTO.getId(), publisherDTO);
-        return ResponseEntity.ok(HttpStatus.OK);
+       return publisherService.update(publisherDTO.getId(), publisherDTO);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable(name = "id") Long id) {
-        publisherService.delete(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return publisherService.delete(id);
     }
 
     @GetMapping("/{name}")

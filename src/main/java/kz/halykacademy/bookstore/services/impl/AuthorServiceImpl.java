@@ -78,7 +78,7 @@ public class AuthorServiceImpl implements AuthorService {
                 return new ResponseEntity("Author is not found", HttpStatus.BAD_REQUEST);
             }
 
-            AuthorDTO authorDTO = convertToAuthorRequest(authorById.get());
+            AuthorDTO authorDTO = convertToAuthorDTO(authorById.get());
             return new ResponseEntity(authorDTO, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -92,7 +92,7 @@ public class AuthorServiceImpl implements AuthorService {
         return authorRepository
                 .findAll()
                 .stream()
-                .map(this::convertToAuthorRequest)
+                .map(this::convertToAuthorDTO)
                 .collect(Collectors.toList());
     }
 
@@ -145,7 +145,7 @@ public class AuthorServiceImpl implements AuthorService {
         return authorRepository
                 .findByNameOrSurnameOrLastnameLike("", "", "")
                 .stream()
-                .map(this::convertToAuthorRequest)
+                .map(this::convertToAuthorDTO)
                 .collect(Collectors.toList());
     }
 
@@ -156,7 +156,7 @@ public class AuthorServiceImpl implements AuthorService {
         return null;
     }
 
-    private AuthorDTO convertToAuthorRequest(Author author) {
+    private AuthorDTO convertToAuthorDTO(Author author) {
         return modelMapper.map(author, AuthorDTO.class);
     }
 
