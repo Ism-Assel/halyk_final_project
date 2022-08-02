@@ -8,7 +8,7 @@ import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Author;
 import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.services.AuthorService;
-import kz.halykacademy.bookstore.utils.authorconvertor.AuthorConvertor;
+import kz.halykacademy.bookstore.utils.convertor.AuthorConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

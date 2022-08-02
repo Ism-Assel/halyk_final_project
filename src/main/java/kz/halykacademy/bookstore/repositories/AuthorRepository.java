@@ -19,4 +19,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     List<Author> findAuthorByGenresList(@Param("genres") Collection<Genre> genres);
 
     Author findAuthorByNameAndSurnameAndLastname(String name, String surname, String lastname);
+
+    List<Author> findAuthorByIdIn(List<Long> id);
 }

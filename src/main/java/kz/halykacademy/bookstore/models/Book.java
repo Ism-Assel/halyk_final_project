@@ -23,7 +23,11 @@ public class Book {
     @Column(name = "price")
     private double price;
 
-    @ManyToMany(mappedBy = "books")
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "author_book",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "author_id"))
     private List<Author> authors;
 
     @ManyToOne

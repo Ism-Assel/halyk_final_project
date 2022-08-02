@@ -1,4 +1,4 @@
-package kz.halykacademy.bookstore.utils.publisherconvertor;
+package kz.halykacademy.bookstore.utils.convertor;
 
 import kz.halykacademy.bookstore.dto.PublisherDTO;
 import kz.halykacademy.bookstore.models.Publisher;

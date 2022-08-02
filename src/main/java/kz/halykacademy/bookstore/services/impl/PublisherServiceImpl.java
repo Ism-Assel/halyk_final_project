@@ -7,7 +7,7 @@ import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Publisher;
 import kz.halykacademy.bookstore.repositories.PublisherRepository;
 import kz.halykacademy.bookstore.services.PublisherService;
-import kz.halykacademy.bookstore.utils.publisherconvertor.PublisherConvertor;
+import kz.halykacademy.bookstore.utils.convertor.PublisherConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
