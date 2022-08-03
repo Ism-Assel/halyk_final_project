@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface PublisherRepository extends JpaRepository<Publisher, Long> {
-    List<Publisher> findByNameLike(String name);
+    List<Publisher> findByNameLikeIgnoreCase(String name);
 
     Publisher findByName(String name);
 }

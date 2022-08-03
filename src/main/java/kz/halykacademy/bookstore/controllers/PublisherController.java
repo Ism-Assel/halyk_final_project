@@ -23,7 +23,7 @@ public class PublisherController {
         return publisherService.readAll();
     }
 
-    @GetMapping("/get")
+    @GetMapping("/searchById")
     public ResponseEntity getById(@RequestParam(name = "id") Long id) {
        return publisherService.readById(id);
     }
@@ -43,8 +43,8 @@ public class PublisherController {
         return publisherService.delete(id);
     }
 
-    @GetMapping("/{name}")
-    public List<PublisherDTO> getByName(@PathVariable(name = "name") String name) {
+    @GetMapping("/searchByName")
+    public List<PublisherDTO> getByName(@RequestParam(name = "name") String name) {
         return publisherService.findByNameLike(name);
 
     }

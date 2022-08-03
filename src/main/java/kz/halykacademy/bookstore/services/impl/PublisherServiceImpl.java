@@ -132,8 +132,10 @@ public class PublisherServiceImpl implements PublisherService {
 
     @Override
     public List<PublisherDTO> findByNameLike(String name) {
+        notNull(name, "Name is undefined");
+
         return publisherRepository
-                .findByNameLike(name)
+                .findByNameLikeIgnoreCase("%" + name + "%")
                 .stream()
                 .map(publisherConvertor::convertToPublisherDTO)
                 .collect(Collectors.toList());

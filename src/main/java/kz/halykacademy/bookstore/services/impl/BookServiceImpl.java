@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -93,7 +94,13 @@ public class BookServiceImpl implements BookService {
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        BookDTO bookDTO = bookConvertor.convertToBookDTO(bookById.get());
+        Book book = bookById.get();
+
+        BookDTO bookDTO = bookConvertor.convertToBookDTO(book);
+        List<Long> ids = new ArrayList<>();
+        book.getAuthors().forEach(author -> ids.add(author.getId()));
+
+        bookDTO.setAuthorIds(ids);
 
         return new ResponseEntity(bookDTO, HttpStatus.OK);
     }
