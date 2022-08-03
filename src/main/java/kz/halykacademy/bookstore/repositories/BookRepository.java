@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    List<Book> findByTitleLike(String title);
+    List<Book> findByTitleLikeIgnoreCase(String title);
 
     @Query(value = "select b from Book b join b.genres g where g.name in :genres order by g.name ")
     List<Book> findBookByGenresList(@Param("genres") Collection<Genre> genres);

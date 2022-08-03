@@ -158,8 +158,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDTO> findByTitle(String title) {
+        notNull(title, "Title is undefined");
+
         return bookRepository
-                .findByTitleLike(title)
+                .findByTitleLikeIgnoreCase("%" + title + "%")
                 .stream()
                 .map(bookConvertor::convertToBookDTO)
                 .collect(Collectors.toList());
