@@ -24,7 +24,7 @@ public class BookController {
         return bookService.readAll();
     }
 
-    @GetMapping("/get")
+    @GetMapping("/searchById")
     public ResponseEntity getById(@RequestParam(name = "id") Long id) {
          return bookService.readById(id);
     }
@@ -44,8 +44,8 @@ public class BookController {
         return bookService.delete(id);
     }
 
-    @GetMapping("/{title}")
-    public List<BookDTO> getByTitle(@PathVariable(name = "title") String title) {
+    @GetMapping("/searchByTitle")
+    public List<BookDTO> getByTitle(@RequestParam(name = "title") String title) {
         return bookService.findByTitle(title);
     }
 

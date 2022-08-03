@@ -24,7 +24,7 @@ public class AuthorController {
         return authorService.readAll();
     }
 
-    @GetMapping("/get")
+    @GetMapping("/searchById")
     public ResponseEntity getById(@RequestParam(name = "id") Long id) {
         return authorService.readById(id);
     }
@@ -44,8 +44,8 @@ public class AuthorController {
         return authorService.delete(id);
     }
 
-    @GetMapping("/{fio}")
-    public List<AuthorDTO> getByFio(@PathVariable(name = "fio") String fio) {
+    @GetMapping("/searchByFio")
+    public List<AuthorDTO> getByFio(@RequestParam(name = "fio") String fio) {
         return authorService.findByNameOrSurnameOrLastnameLike(fio);
     }
 

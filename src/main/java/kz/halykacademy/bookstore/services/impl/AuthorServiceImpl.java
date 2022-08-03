@@ -137,10 +137,14 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<AuthorDTO> findByNameOrSurnameOrLastnameLike(String fio) {
-        // todo дописать логику
-        return authorRepository
-                .findByNameOrSurnameOrLastnameLike("", "", "")
-                .stream()
+        notNull(fio, "FIO is empty");
+
+        String fioLike = "%" + fio + "%";
+
+        List<Author> author =
+                authorRepository.findAuthorByFIOLike(fioLike, fioLike, fioLike);
+
+        return author.stream()
                 .map(authorConvertor::convertToAuthorDTO)
                 .collect(Collectors.toList());
     }

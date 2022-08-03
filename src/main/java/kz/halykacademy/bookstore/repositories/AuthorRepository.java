@@ -13,7 +13,12 @@ import java.util.List;
 @Repository
 public interface AuthorRepository extends JpaRepository<Author, Long> {
 
-    List<Author> findByNameOrSurnameOrLastnameLike(String name, String surname, String lastname);
+    @Query(value = " select * " +
+                    "  from author a " +
+                    " where lower(a.name) like lower(?1) " +
+                    "    or lower(a.surname) like lower(?2) " +
+                    "    or lower(a.lastname) like lower(?3)", nativeQuery = true)
+    List<Author> findAuthorByFIOLike(String name, String surname, String lastname);
 
     @Query(value = "select a from Author a join a.genres g where g.name in :genres order by g.name ")
     List<Author> findAuthorByGenresList(@Param("genres") Collection<Genre> genres);
