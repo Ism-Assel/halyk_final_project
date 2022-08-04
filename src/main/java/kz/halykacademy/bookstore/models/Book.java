@@ -43,6 +43,10 @@ public class Book {
     @Column(name = "publication_year")
     private String publicationYear;
 
-    @OneToMany(mappedBy = "book")
+    @ManyToMany
+    @JoinTable(
+            name = "genre_book",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private List<Genre> genres;
 }

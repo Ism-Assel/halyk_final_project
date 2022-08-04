@@ -23,7 +23,7 @@ public class GenreController {
         return genreService.readAll();
     }
 
-    @GetMapping("/get")
+    @GetMapping("/searchById")
     public ResponseEntity getById(@RequestParam(name = "id") Long id) {
         return genreService.readById(id);
     }

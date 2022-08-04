@@ -40,6 +40,10 @@ public class Author {
             inverseJoinColumns = @JoinColumn(name = "book_id"))
     private List<Book> books;
 
-    @OneToMany(mappedBy = "author")
+    @ManyToMany
+    @JoinTable(
+            name = "genre_author",
+            joinColumns = @JoinColumn(name = "author_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private List<Genre> genres;
 }

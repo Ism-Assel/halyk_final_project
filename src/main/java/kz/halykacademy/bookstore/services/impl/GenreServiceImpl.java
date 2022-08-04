@@ -4,7 +4,11 @@ import kz.halykacademy.bookstore.dto.GenreDTO;
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
+import kz.halykacademy.bookstore.models.Author;
+import kz.halykacademy.bookstore.models.Book;
 import kz.halykacademy.bookstore.models.Genre;
+import kz.halykacademy.bookstore.repositories.AuthorRepository;
+import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.GenreRepository;
 import kz.halykacademy.bookstore.services.GenreService;
 import kz.halykacademy.bookstore.utils.convertor.GenreConvertor;
@@ -14,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,11 +34,19 @@ public class GenreServiceImpl implements GenreService {
 
     private final GenreRepository genreRepository;
     private final GenreConvertor genreConvertor;
+    private final AuthorRepository authorRepository;
+    private final BookRepository bookRepository;
 
     @Autowired
-    public GenreServiceImpl(GenreRepository genreRepository, GenreConvertor genreConvertor) {
+    public GenreServiceImpl(GenreRepository genreRepository,
+                            GenreConvertor genreConvertor,
+                            AuthorRepository authorRepository,
+                            BookRepository bookRepository
+    ) {
         this.genreRepository = genreRepository;
         this.genreConvertor = genreConvertor;
+        this.authorRepository = authorRepository;
+        this.bookRepository = bookRepository;
     }
 
     @Override
@@ -43,6 +56,12 @@ public class GenreServiceImpl implements GenreService {
 
         // конвертирование DTO в Entity
         Genre genre = genreConvertor.convertToGenre(genreDTO);
+
+        List<Author> authors = authorRepository.findAuthorByIdIn(genreDTO.getAuthorIds());
+        List<Book> books = bookRepository.findBookByIdIn(genreDTO.getBookIds());
+
+        genre.setAuthors(authors);
+        genre.setBooks(books);
 
         // Поиск автора в БД
         Genre foundGenre = genreRepository.findByName(genre.getName());
@@ -72,7 +91,17 @@ public class GenreServiceImpl implements GenreService {
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        GenreDTO genreDTO = genreConvertor.convertToGenreDTO(genreById.get());
+        Genre genre = genreById.get();
+
+        GenreDTO genreDTO = genreConvertor.convertToGenreDTO(genre);
+
+        List<Long> authorIds = new ArrayList<>();
+        List<Long> bookIds = new ArrayList<>();
+        genre.getAuthors().forEach(author -> authorIds.add(author.getId()));
+        genre.getBooks().forEach(book -> bookIds.add(book.getId()));
+
+        genreDTO.setAuthorIds(authorIds);
+        genreDTO.setBookIds(bookIds);
 
         return new ResponseEntity(genreDTO, HttpStatus.OK);
     }
