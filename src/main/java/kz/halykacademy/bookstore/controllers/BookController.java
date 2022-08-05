@@ -1,7 +1,6 @@
 package kz.halykacademy.bookstore.controllers;
 
 import kz.halykacademy.bookstore.dto.BookDTO;
-import kz.halykacademy.bookstore.dto.GenreDTO;
 import kz.halykacademy.bookstore.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,8 +48,8 @@ public class BookController {
         return bookService.findByTitle(title);
     }
 
-    @GetMapping("/searchByGenreList")
-    public List<BookDTO> getByGenre(@RequestParam(name = "genres") List<GenreDTO> genres) {
+    @GetMapping("/searchByGenres")
+    public ResponseEntity getByGenre(@RequestParam(name = "genres") String genres) {
         return bookService.findByGenres(genres);
     }
 }

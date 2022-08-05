@@ -1,7 +1,6 @@
 package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.dto.BookDTO;
-import kz.halykacademy.bookstore.dto.GenreDTO;
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -168,10 +168,18 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDTO> findByGenres(List<GenreDTO> genres) {
+    public ResponseEntity findByGenres(String genres) {
         // todo ипсравить
-//        return bookRepository.findBookByGenresList(genres);
-        return null;
+
+        String[] genresAsArray = genres.split(",");
+        genresAsArray = Arrays.stream(genresAsArray).map(String::trim).toArray(String[]::new);
+
+        List<BookDTO> books = bookRepository.findBookByGenres(genresAsArray)
+                .stream()
+                .map(bookConvertor::convertToBookDTO)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity(books, HttpStatus.OK);
     }
 
     protected void checkParameters(BookDTO bookDTO) {
