@@ -169,10 +169,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public ResponseEntity findByGenres(String genres) {
-        // todo ипсравить
-
         String[] genresAsArray = genres.split(",");
-        genresAsArray = Arrays.stream(genresAsArray).map(String::trim).toArray(String[]::new);
+        genresAsArray =
+                Arrays.stream(genresAsArray)
+                        .map(String::trim)
+                        .toArray(String[]::new);
 
         List<BookDTO> books = bookRepository.findBookByGenres(genresAsArray)
                 .stream()

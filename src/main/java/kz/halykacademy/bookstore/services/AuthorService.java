@@ -1,7 +1,7 @@
 package kz.halykacademy.bookstore.services;
 
 import kz.halykacademy.bookstore.dto.AuthorDTO;
-import kz.halykacademy.bookstore.dto.GenreDTO;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -9,5 +9,5 @@ public interface AuthorService extends Service<AuthorDTO>{
 
     List<AuthorDTO> findByNameOrSurnameOrLastnameLike(String fio);
 
-    List<AuthorDTO> findByGenresIn(List<GenreDTO> genres);
+    ResponseEntity findByGenres(String genres);
 }
