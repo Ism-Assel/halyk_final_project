@@ -57,8 +57,8 @@ public class GenreServiceImpl implements GenreService {
         // конвертирование DTO в Entity
         Genre genre = genreConvertor.convertToGenre(genreDTO);
 
-        List<Author> authors = authorRepository.findAuthorByIdIn(genreDTO.getAuthorIds());
-        List<Book> books = bookRepository.findBookByIdIn(genreDTO.getBookIds());
+        List<Author> authors = authorRepository.findAuthorByIdIn(genreDTO.getAuthorsId());
+        List<Book> books = bookRepository.findBookByIdIn(genreDTO.getBooksId());
 
         genre.setAuthors(authors);
         genre.setBooks(books);
@@ -100,8 +100,8 @@ public class GenreServiceImpl implements GenreService {
         genre.getAuthors().forEach(author -> authorIds.add(author.getId()));
         genre.getBooks().forEach(book -> bookIds.add(book.getId()));
 
-        genreDTO.setAuthorIds(authorIds);
-        genreDTO.setBookIds(bookIds);
+        genreDTO.setAuthorsId(authorIds);
+        genreDTO.setBooksId(bookIds);
 
         return new ResponseEntity(genreDTO, HttpStatus.OK);
     }
@@ -159,6 +159,10 @@ public class GenreServiceImpl implements GenreService {
 
     protected void checkParameters(GenreDTO genreDTO) {
         notNull(genreDTO.getName(), "Name is undefined");
+        if (genreDTO.getAuthorsId().isEmpty()) {
+            throw new ClientBadRequestException("List of authors id is empty");
+        }
+        notNull(genreDTO.getBooksId(), "Book id is empty");
     }
 
     protected void checkParameters(Long id, GenreDTO genreDTO) {

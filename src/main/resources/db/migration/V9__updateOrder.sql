@@ -1,0 +1,1 @@
+alter table order_ drop column book_id;

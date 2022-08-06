@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "user_")
@@ -30,4 +31,7 @@ public class User {
 
     @Column(name = "is_blocked")
     private boolean isBlocked;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
 }

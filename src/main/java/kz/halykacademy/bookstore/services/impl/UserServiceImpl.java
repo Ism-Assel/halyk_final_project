@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         // Поиск user в БД
         User foundUser = userRepository.findByLogin(user.getLogin());
 
-        // Проверка существует ли автор
+        // Проверка существует ли user
         if (foundUser == null) {
             userRepository.save(user);
 
@@ -64,14 +64,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity readById(Long id) {
         // Поиск user по id
-        Optional<User> userBuId = userRepository.findById(id);
+        Optional<User> userById = userRepository.findById(id);
 
-        if (userBuId.isEmpty()) {
+        if (userById.isEmpty()) {
             // Если не найден user
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        UserDTO userDTO = userConvertor.convertToUserDTO(userBuId.get());
+        UserDTO userDTO = userConvertor.convertToUserDTO(userById.get());
 
         return new ResponseEntity(userDTO, HttpStatus.OK);
     }
@@ -90,9 +90,9 @@ public class UserServiceImpl implements UserService {
         checkParameters(id, updatedUserDTO);
 
         // Поиск user по id
-        Optional<User> userBuId = userRepository.findById(id);
+        Optional<User> userById = userRepository.findById(id);
 
-        if (userBuId.isPresent()) {
+        if (userById.isPresent()) {
             // Если найден, обновляем user
             userRepository.save(userConvertor.convertToUser(updatedUserDTO));
 
@@ -133,5 +133,8 @@ public class UserServiceImpl implements UserService {
 
     protected void checkParameters(UserDTO userDTO) {
         notNull(userDTO.getLogin(), "Login is undefined");
+        notNull(userDTO.getPassword(), "Password is undefined");
+        notNull(userDTO.getRole(), "Role is undefined");
+        notNull(userDTO.getIsBlocked(), "Blocked is empty");
     }
 }

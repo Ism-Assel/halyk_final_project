@@ -8,6 +8,6 @@ import java.util.List;
 public class GenreDTO {
     private Long id;
     private String name;
-    private List<Long> authorIds;
-    private List<Long> bookIds;
+    private List<Long> authorsId;
+    private List<Long> booksId;
 }

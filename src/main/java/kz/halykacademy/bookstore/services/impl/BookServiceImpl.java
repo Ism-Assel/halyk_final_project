@@ -59,7 +59,7 @@ public class BookServiceImpl implements BookService {
         // конвертирование DTO в Entity
         Book book = bookConvertor.convertToBook(bookDTO);
 
-        List<Author> authors = authorRepository.findAuthorByIdIn(bookDTO.getAuthorIds());
+        List<Author> authors = authorRepository.findAuthorByIdIn(bookDTO.getAuthorsId());
 
         Optional<Publisher> publisher = publisherRepository.findById(bookDTO.getPublisherId());
 
@@ -100,7 +100,7 @@ public class BookServiceImpl implements BookService {
         List<Long> ids = new ArrayList<>();
         book.getAuthors().forEach(author -> ids.add(author.getId()));
 
-        bookDTO.setAuthorIds(ids);
+        bookDTO.setAuthorsId(ids);
 
         return new ResponseEntity(bookDTO, HttpStatus.OK);
     }
@@ -187,7 +187,7 @@ public class BookServiceImpl implements BookService {
         notNull(bookDTO.getTitle(), "Title is undefined");
         notNull(bookDTO.getPrice(), "Price is undefined");
         notNull(bookDTO.getPages(), "Pages is undefined");
-        bookDTO.getAuthorIds().forEach(id -> notNull(id, "Author's id is undefined"));
+        bookDTO.getAuthorsId().forEach(id -> notNull(id, "Author's id is undefined"));
         notNull(bookDTO.getPublisherId(), "Publisher's id is undefined");
         notNull(bookDTO.getPublicationYear(), "Year of publication is undefined");
     }
