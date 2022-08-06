@@ -73,11 +73,11 @@ public class GenreServiceImpl implements GenreService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(String.format(MESSAGE_SUCCESS)));
+                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(String.format(MESSAGE_EXISTED));
+            throw new ClientBadRequestException(MESSAGE_EXISTED);
         }
     }
 
@@ -128,7 +128,7 @@ public class GenreServiceImpl implements GenreService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(String.format(MESSAGE_SUCCESS)));
+                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
         } else {
             // иначе выводим сообщение пользователю
@@ -150,7 +150,7 @@ public class GenreServiceImpl implements GenreService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(String.format(MESSAGE_SUCCESS)));
+                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
         } else {
             // иначе выводим сообщение пользователю
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));

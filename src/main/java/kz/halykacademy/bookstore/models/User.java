@@ -1,9 +1,18 @@
 package kz.halykacademy.bookstore.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "user_")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class User {
     @Id
     @Column(name = "id")
@@ -21,54 +30,4 @@ public class User {
 
     @Column(name = "is_blocked")
     private boolean isBlocked;
-
-    public User() {
-    }
-
-    public User(String login, String password, String role, boolean isBlocked) {
-        this.login = login;
-        this.password = password;
-        this.role = role;
-        this.isBlocked = isBlocked;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public boolean isBlocked() {
-        return isBlocked;
-    }
-
-    public void setBlocked(boolean blocked) {
-        isBlocked = blocked;
-    }
 }

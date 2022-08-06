@@ -55,11 +55,11 @@ public class PublisherServiceImpl implements PublisherService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(String.format(MESSAGE_SUCCESS)));
+                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(String.format(MESSAGE_EXISTED));
+            throw new ClientBadRequestException(MESSAGE_EXISTED);
         }
     }
 
@@ -100,7 +100,7 @@ public class PublisherServiceImpl implements PublisherService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(String.format(MESSAGE_SUCCESS)));
+                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
         } else {
             // иначе выводим сообщение пользователю
@@ -122,7 +122,7 @@ public class PublisherServiceImpl implements PublisherService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(String.format(MESSAGE_SUCCESS)));
+                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
         } else {
             // иначе выводим сообщение пользователю
