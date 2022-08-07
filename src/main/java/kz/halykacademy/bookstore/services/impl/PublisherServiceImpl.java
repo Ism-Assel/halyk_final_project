@@ -148,8 +148,5 @@ public class PublisherServiceImpl implements PublisherService {
 
     protected void checkParameters(PublisherDTO publisherDTO) {
         notNull(publisherDTO.getName(), "Name is undefined");
-        if (publisherDTO.getBooks().isEmpty()){
-            throw new ClientBadRequestException("List of books is empty");
-        }
     }
 }

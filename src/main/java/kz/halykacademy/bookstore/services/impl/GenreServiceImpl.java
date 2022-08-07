@@ -162,7 +162,9 @@ public class GenreServiceImpl implements GenreService {
         if (genreDTO.getAuthorsId().isEmpty()) {
             throw new ClientBadRequestException("List of authors id is empty");
         }
-        notNull(genreDTO.getBooksId(), "Book id is empty");
+        if (genreDTO.getBooksId().isEmpty()) {
+            throw new ClientBadRequestException("List of books id is empty");
+        }
     }
 
     protected void checkParameters(Long id, GenreDTO genreDTO) {
