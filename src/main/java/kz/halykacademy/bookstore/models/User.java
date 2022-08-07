@@ -30,7 +30,7 @@ public class User {
     private String role;
 
     @Column(name = "is_blocked")
-    private boolean isBlocked;
+    private Boolean isBlocked;
 
     @OneToMany(mappedBy = "user")
     private List<Order> orders;

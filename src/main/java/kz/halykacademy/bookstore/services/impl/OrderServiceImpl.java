@@ -32,6 +32,10 @@ public class OrderServiceImpl implements OrderService {
     private final String MESSAGE_NOT_FOUND = "Order is not found with id = %d";
     private final String MESSAGE_SUCCESS = "success";
     private final String MESSAGE_EXISTED = "This order is existed";
+    private final String MESSAGE_ORDER_PRICE = "Order price should not be greater than 10000 tg. Total price of order is: %.2f";
+    private final Double MAX_PRICE = 10000.0;
+    private final String MESSAGE_USER_NOT_FOUND = "User is not found with id = %d";
+    private final String MESSAGE_IS_BLOCKED = "User is blocked";
 
     private final OrderRepository orderRepository;
     private final OrderConvertor orderConvertor;
@@ -59,11 +63,14 @@ public class OrderServiceImpl implements OrderService {
         // конвертирование DTO в Entity
         Order order = orderConvertor.convertToOrder(orderDTO);
 
-        List<Book> books = bookRepository.findBookByIdIn(orderDTO.getBooksId());
-        Optional<User> user = userRepository.findById(orderDTO.getUserId());
+        // проверка общей суммы заказа и возращение списка книг
+        List<Book> books = checkOrderPriceAndGetBooks(orderDTO);
+
+        // проверка user на блокировку
+        User user = checkUser(orderDTO);
 
         order.setBooks(books);
-        order.setUser(user.get());
+        order.setUser(user);
         order.setStatus(OrderStatus.valueOf(orderDTO.getStatus()));
 
         orderRepository.save(order);
@@ -158,5 +165,34 @@ public class OrderServiceImpl implements OrderService {
             throw new ClientBadRequestException("List of books id is empty");
         }
         notNull(orderDTO.getUserId(), "User id is empty");
+    }
+
+    protected List<Book> checkOrderPriceAndGetBooks(OrderDTO orderDTO) {
+        double totalPrice = 0;
+
+        List<Book> books = bookRepository.findBookByIdIn(orderDTO.getBooksId());
+        for (Book book : books) {
+            totalPrice += book.getPrice();
+        }
+
+        if (totalPrice > MAX_PRICE) {
+            throw new ClientBadRequestException(String.format(MESSAGE_ORDER_PRICE, totalPrice));
+        }
+
+        return books;
+    }
+
+    protected User checkUser(OrderDTO orderDTO) {
+        Optional<User> user = userRepository.findById(orderDTO.getUserId());
+
+        if (user.isEmpty()) {
+            throw new ClientBadRequestException(String.format(MESSAGE_USER_NOT_FOUND, orderDTO.getUserId()));
+        }
+
+        if (user.get().getIsBlocked()) {
+            throw new ClientBadRequestException(MESSAGE_IS_BLOCKED);
+        }
+
+        return user.get();
     }
 }
