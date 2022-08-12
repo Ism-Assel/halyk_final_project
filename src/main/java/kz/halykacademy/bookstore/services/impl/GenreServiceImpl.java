@@ -89,18 +89,6 @@ public class GenreServiceImpl implements GenreService {
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-//        Genre genre = foundGenre.get();
-
-//        GenreDTO genreDTO = genreConvertor.convertToGenreDTO(genre);
-//
-//        List<Long> authorIds = new ArrayList<>();
-//        List<Long> bookIds = new ArrayList<>();
-//        genre.getAuthors().forEach(author -> authorIds.add(author.getId()));
-//        genre.getBooks().forEach(book -> bookIds.add(book.getId()));
-//
-//        genreDTO.setAuthorsId(authorIds);
-//        genreDTO.setBooksId(bookIds);
-
         return new ResponseEntity(foundGenre.map(Genre::toGenreDto).get(), HttpStatus.OK);
     }
 

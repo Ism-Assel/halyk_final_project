@@ -1,6 +1,5 @@
 package kz.halykacademy.bookstore.services.impl;
 
-import kz.halykacademy.bookstore.dto.BookDTO;
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
 import kz.halykacademy.bookstore.dto.book.BookRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
@@ -12,7 +11,6 @@ import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.PublisherRepository;
 import kz.halykacademy.bookstore.services.BookService;
-import kz.halykacademy.bookstore.utils.convertor.BookConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,19 +35,16 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
-    private final BookConvertor bookConvertor;
 
     @Autowired
     public BookServiceImpl(
             BookRepository bookRepository,
             AuthorRepository authorRepository,
-            PublisherRepository publisherRepository,
-            BookConvertor bookConvertor
+            PublisherRepository publisherRepository
     ) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.publisherRepository = publisherRepository;
-        this.bookConvertor = bookConvertor;
     }
 
     @Override
@@ -199,12 +194,13 @@ public class BookServiceImpl implements BookService {
                         .map(String::trim)
                         .toArray(String[]::new);
 
-        List<BookDTO> books = bookRepository.findBookByGenres(genresAsArray)
-                .stream()
-                .map(bookConvertor::convertToBookDTO)
-                .collect(Collectors.toList());
+        List<Book> books = bookRepository.findBookByGenres(genresAsArray);
 
-        return new ResponseEntity(books, HttpStatus.OK);
+        return new ResponseEntity(
+                books.stream()
+                        .map(Book::toBookDto)
+                        .collect(Collectors.toSet()),
+                HttpStatus.OK);
     }
 
     protected void checkParameters(BookRequest request) {

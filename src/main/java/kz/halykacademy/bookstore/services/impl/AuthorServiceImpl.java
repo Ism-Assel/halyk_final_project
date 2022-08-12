@@ -1,6 +1,5 @@
 package kz.halykacademy.bookstore.services.impl;
 
-import kz.halykacademy.bookstore.dto.AuthorDTO;
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
 import kz.halykacademy.bookstore.dto.author.AuthorRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
@@ -10,7 +9,6 @@ import kz.halykacademy.bookstore.models.Book;
 import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.services.AuthorService;
-import kz.halykacademy.bookstore.utils.convertor.AuthorConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,17 +29,14 @@ public class AuthorServiceImpl implements AuthorService {
     private final String MESSAGE_LIST_AUTHORS = "List of authors are empty";
 
     private final AuthorRepository authorRepository;
-    private final AuthorConvertor authorConvertor;
     private final BookRepository bookRepository;
 
     @Autowired
     public AuthorServiceImpl(
             AuthorRepository authorRepository,
-            AuthorConvertor authorConvertor,
             BookRepository bookRepository
     ) {
         this.authorRepository = authorRepository;
-        this.authorConvertor = authorConvertor;
         this.bookRepository = bookRepository;
     }
 
@@ -190,13 +185,11 @@ public class AuthorServiceImpl implements AuthorService {
         List<Book> books = bookRepository.findBookByGenres(genresAsArray);
         books.forEach(book -> authors.addAll(book.getAuthors()));
 
-        List<AuthorDTO> authorsDTO =
+        return new ResponseEntity(
                 authors.stream()
-                        .map(authorConvertor::convertToAuthorDTO)
-                        .collect(Collectors.toList());
-
-        return new ResponseEntity(authorsDTO, HttpStatus.OK);
-
+                        .map(Author::toAuthorDto)
+                        .collect(Collectors.toList()),
+                HttpStatus.OK);
     }
 
     protected void checkParameters(Long id, AuthorRequest request) {

@@ -1,14 +1,12 @@
 package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
-import kz.halykacademy.bookstore.dto.OrderDTO;
 import kz.halykacademy.bookstore.dto.order.OrderAdminRequest;
 import kz.halykacademy.bookstore.dto.order.OrderUserRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Book;
 import kz.halykacademy.bookstore.models.Order;
-import kz.halykacademy.bookstore.models.User;
 import kz.halykacademy.bookstore.models.enums.OrderStatus;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.OrderRepository;
@@ -199,17 +197,17 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
-    protected User checkUser(OrderDTO orderDTO) {
-        Optional<User> user = userRepository.findById(orderDTO.getUserId());
-
-        if (user.isEmpty()) {
-            throw new ClientBadRequestException(String.format(MESSAGE_USER_NOT_FOUND, orderDTO.getUserId()));
-        }
-
-        if (user.get().getIsBlocked()) {
-            throw new ClientBadRequestException(MESSAGE_IS_BLOCKED);
-        }
-
-        return user.get();
-    }
+//    protected User checkUser(OrderDTO orderDTO) {
+//        Optional<User> user = userRepository.findById(orderDTO.getUserId());
+//
+//        if (user.isEmpty()) {
+//            throw new ClientBadRequestException(String.format(MESSAGE_USER_NOT_FOUND, orderDTO.getUserId()));
+//        }
+//
+//        if (user.get().getIsBlocked()) {
+//            throw new ClientBadRequestException(MESSAGE_IS_BLOCKED);
+//        }
+//
+//        return user.get();
+//    }
 }
