@@ -2,6 +2,7 @@ package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.dto.AuthorDTO;
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
+import kz.halykacademy.bookstore.dto.author.AuthorRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Author;
@@ -27,6 +28,7 @@ public class AuthorServiceImpl implements AuthorService {
     private final String MESSAGE_NOT_FOUND = "Author is not found with id = %d";
     private final String MESSAGE_SUCCESS = "success";
     private final String MESSAGE_EXISTED = "This author is existed";
+    private final String MESSAGE_LIST_AUTHORS = "List of authors are empty";
 
     private final AuthorRepository authorRepository;
     private final AuthorConvertor authorConvertor;
@@ -44,28 +46,35 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public ResponseEntity create(AuthorDTO authorDTO) {
+    public ResponseEntity create(AuthorRequest request) {
         // проверка параметров запроса
-        checkParameters(authorDTO);
-
-        // конвертирование DTO в Entity
-        Author author = authorConvertor.convertToAuthor(authorDTO);
+        checkParameters(request);
 
         // Поиск автора в БД
         Author foundAuthor = authorRepository
                 .findAuthorByNameAndSurnameAndLastname(
-                        author.getName(),
-                        author.getSurname(),
-                        author.getLastname());
+                        request.getName(),
+                        request.getSurname(),
+                        request.getLastname());
 
         // Проверка существует ли автор
         if (foundAuthor == null) {
             // если нет, то создаем
-            authorRepository.save(author);
+            Author author = new Author(
+                    request.getId(),
+                    request.getName(),
+                    request.getSurname(),
+                    request.getLastname(),
+                    request.getDateOfBirth(),
+                    null,
+                    null
+            );
+
+            author = authorRepository.save(author);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(author.toAuthorDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -76,44 +85,55 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public ResponseEntity readById(Long id) {
         // Поиск автора по id
-        Optional<Author> authorById = authorRepository.findById(id);
+        Optional<Author> foundAuthor = authorRepository.findById(id);
 
-        if (authorById.isEmpty()) {
+        if (foundAuthor.isEmpty()) {
             // Если не найден автор
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        AuthorDTO authorDTO = authorConvertor.convertToAuthorDTO(authorById.get());
-
-        return new ResponseEntity(authorDTO, HttpStatus.OK);
+        return new ResponseEntity(foundAuthor.map(Author::toAuthorDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-//        return authorRepository
-//                .findAll()
-//                .stream()
-//                .map(authorConvertor::convertToAuthorDTO)
-//                .collect(Collectors.toList());
-        return null;
+        List<Author> authors = authorRepository.findAll();
+        if (authors.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
+        }
+
+        return new ResponseEntity(
+                authors.stream()
+                        .map(Author::toAuthorDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity update(Long id, AuthorDTO updatedAuthorDTO) {
+    public ResponseEntity update(Long id, AuthorRequest request) {
 
         // проверка параметров запроса
-        checkParameters(id, updatedAuthorDTO);
+        checkParameters(id, request);
 
         // Поиск автора по id
-        Optional<Author> author = authorRepository.findById(id);
+        Optional<Author> foundAuthor = authorRepository.findById(id);
 
-        if (author.isPresent()) {
+        if (foundAuthor.isPresent()) {
             // Если найден, обновляем автора
-            authorRepository.save(authorConvertor.convertToAuthor(updatedAuthorDTO));
+            Author author = new Author(
+                    request.getId(),
+                    request.getName(),
+                    request.getSurname(),
+                    request.getLastname(),
+                    request.getDateOfBirth(),
+                    null,
+                    null
+            );
+
+            author = authorRepository.save(author);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(author.toAuthorDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -143,17 +163,18 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public List<AuthorDTO> findByNameOrSurnameOrLastnameLike(String fio) {
+    public ResponseEntity findByNameOrSurnameOrLastnameLike(String fio) {
         notNull(fio, "FIO is empty");
 
         String fioLike = "%" + fio + "%";
 
-        List<Author> author =
+        List<Author> authors =
                 authorRepository.findAuthorByFIOLike(fioLike, fioLike, fioLike);
 
-        return author.stream()
-                .map(authorConvertor::convertToAuthorDTO)
-                .collect(Collectors.toList());
+        return new ResponseEntity(
+                authors.stream()
+                        .map(Author::toAuthorDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
@@ -178,14 +199,14 @@ public class AuthorServiceImpl implements AuthorService {
 
     }
 
-    protected void checkParameters(Long id, AuthorDTO authorDTO) {
+    protected void checkParameters(Long id, AuthorRequest request) {
         notNull(id, "Id is undefined");
-        checkParameters(authorDTO);
+        checkParameters(request);
     }
 
-    protected void checkParameters(AuthorDTO authorDTO) {
-        notNull(authorDTO.getName(), "Name is undefined");
-        notNull(authorDTO.getSurname(), "Surname is undefined");
-        notNull(authorDTO.getDateOfBirth(), "Date of birth is undefined");
+    protected void checkParameters(AuthorRequest request) {
+        notNull(request.getName(), "Name is undefined");
+        notNull(request.getSurname(), "Surname is undefined");
+        notNull(request.getDateOfBirth(), "Date of birth is undefined");
     }
 }

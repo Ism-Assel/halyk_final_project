@@ -1,12 +1,10 @@
 package kz.halykacademy.bookstore.controllers;
 
-import kz.halykacademy.bookstore.dto.AuthorDTO;
+import kz.halykacademy.bookstore.dto.author.AuthorRequest;
 import kz.halykacademy.bookstore.services.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/authors")
@@ -29,13 +27,13 @@ public class AuthorController {
     }
 
     @PostMapping
-    public ResponseEntity post(@RequestBody AuthorDTO authorDTO) {
-        return authorService.create(authorDTO);
+    public ResponseEntity post(@RequestBody AuthorRequest request) {
+        return authorService.create(request);
     }
 
     @PutMapping()
-    public ResponseEntity put(@RequestBody AuthorDTO authorDTO) {
-        return authorService.update(authorDTO.getId(), authorDTO);
+    public ResponseEntity put(@RequestBody AuthorRequest request) {
+        return authorService.update(request.getId(), request);
     }
 
     @DeleteMapping("/{id}")
@@ -44,7 +42,7 @@ public class AuthorController {
     }
 
     @GetMapping("/searchByFio")
-    public List<AuthorDTO> getByFio(@RequestParam(name = "fio") String fio) {
+    public ResponseEntity getByFio(@RequestParam(name = "fio") String fio) {
         return authorService.findByNameOrSurnameOrLastnameLike(fio);
     }
 

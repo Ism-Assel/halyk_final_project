@@ -1,18 +1,18 @@
-package kz.halykacademy.bookstore.dto;
+package kz.halykacademy.bookstore.dto.author;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
-@Deprecated
 @Data
-public class AuthorDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class AuthorRequest {
     private Long id;
     private String name;
     private String surname;
     private String lastname;
     private LocalDate dateOfBirth;
-    private List<BookDTO> books;
-    private List<GenreDTO> genres;
 }
