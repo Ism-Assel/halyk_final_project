@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
                     request.getId(),
                     request.getLogin(),
                     passwordEncoder.encode(request.getPassword()),
-                    request.getRole(),
+                    request.getRole().toUpperCase(),
                     request.getIsBlocked(),
                     null
             );
@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
                     request.getId(),
                     request.getLogin(),
                     passwordEncoder.encode(request.getPassword()),
-                    request.getRole(),
+                    request.getRole().toUpperCase(),
                     request.getIsBlocked(),
                     null
             );

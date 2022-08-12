@@ -12,9 +12,9 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Query(value = " select * " +
                     "  from author a " +
-                    " where lower(a.name) like lower(?1) " +
-                    "    or lower(a.surname) like lower(?2) " +
-                    "    or lower(a.lastname) like lower(?3)", nativeQuery = true)
+                    " where lower(a.name) like concat('%', lower(?1), '%') " +
+                    "    or lower(a.surname) like concat('%', lower(?2), '%') " +
+                    "    or lower(a.lastname) like concat('%', lower(?3), '%') ", nativeQuery = true)
     List<Author> findAuthorByFIOLike(String name, String surname, String lastname);
 
     Author findAuthorByNameAndSurnameAndLastname(String name, String surname, String lastname);

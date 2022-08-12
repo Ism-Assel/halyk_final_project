@@ -168,12 +168,10 @@ public class AuthorServiceImpl implements AuthorService {
         // проверяем заблокирован ли пользователь
         BlockedUserChecker.checkBlockedUser();
 
-        notNull(fio, "FIO is empty"); // like '[%]'
-
-        String fioLike = "%" + fio + "%";
+        notNull(fio, "FIO is empty");
 
         List<Author> authors =
-                authorRepository.findAuthorByFIOLike(fioLike, fioLike, fioLike);
+                authorRepository.findAuthorByFIOLike(fio, fio, fio);
 
         return new ResponseEntity(
                 authors.stream()
