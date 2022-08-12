@@ -1,6 +1,6 @@
 package kz.halykacademy.bookstore.controllers;
 
-import kz.halykacademy.bookstore.dto.GenreDTO;
+import kz.halykacademy.bookstore.dto.genre.GenreRequest;
 import kz.halykacademy.bookstore.services.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +27,13 @@ public class GenreController {
     }
 
     @PostMapping
-    public ResponseEntity post(@RequestBody GenreDTO genreDTO) {
-       return genreService.create(genreDTO);
+    public ResponseEntity post(@RequestBody GenreRequest request) {
+       return genreService.create(request);
     }
 
     @PutMapping
-    public ResponseEntity put(@RequestBody GenreDTO genreDTO) {
-       return genreService.update(genreDTO.getId(), genreDTO);
+    public ResponseEntity put(@RequestBody GenreRequest request) {
+       return genreService.update(request.getId(), request);
     }
 
     @DeleteMapping("/{id}")

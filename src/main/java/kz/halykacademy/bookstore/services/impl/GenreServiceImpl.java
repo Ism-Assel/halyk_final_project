@@ -1,7 +1,7 @@
 package kz.halykacademy.bookstore.services.impl;
 
-import kz.halykacademy.bookstore.dto.GenreDTO;
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
+import kz.halykacademy.bookstore.dto.genre.GenreRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Author;
@@ -11,16 +11,15 @@ import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.GenreRepository;
 import kz.halykacademy.bookstore.services.GenreService;
-import kz.halykacademy.bookstore.utils.convertor.GenreConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
 
@@ -30,49 +29,49 @@ public class GenreServiceImpl implements GenreService {
     private final String MESSAGE_NOT_FOUND = "Genre is not found with id = %d";
     private final String MESSAGE_SUCCESS = "success";
     private final String MESSAGE_EXISTED = "This genre is existed";
+    private final String MESSAGE_LIST_GENRES = "List of genres are empty";
 
     private final GenreRepository genreRepository;
-    private final GenreConvertor genreConvertor;
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
 
     @Autowired
     public GenreServiceImpl(GenreRepository genreRepository,
-                            GenreConvertor genreConvertor,
                             AuthorRepository authorRepository,
                             BookRepository bookRepository
     ) {
         this.genreRepository = genreRepository;
-        this.genreConvertor = genreConvertor;
         this.authorRepository = authorRepository;
         this.bookRepository = bookRepository;
     }
 
     @Override
-    public ResponseEntity create(GenreDTO genreDTO) {
+    public ResponseEntity create(GenreRequest request) {
         // проверка параметров запроса
-        checkParameters(genreDTO);
-
-        // конвертирование DTO в Entity
-        Genre genre = genreConvertor.convertToGenre(genreDTO);
-
-        List<Author> authors = authorRepository.findAuthorByIdIn(genreDTO.getAuthorsId());
-        List<Book> books = bookRepository.findBookByIdIn(genreDTO.getBooksId());
-
-        genre.setAuthors(authors);
-        genre.setBooks(books);
+        checkParameters(request);
 
         // Поиск автора в БД
-        Genre foundGenre = genreRepository.findByName(genre.getName());
+        Optional<Genre> foundGenre = genreRepository.findByName(request.getName());
 
         // Проверка существует ли жанр
-        if (foundGenre == null) {
+        if (foundGenre.isEmpty()) {
             // если нет, то создаем
-            genreRepository.save(genre);
+
+            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
+            List<Book> books = bookRepository.findBookByIdIn(request.getBooksId());
+
+            Genre genre = new Genre(
+                    request.getId(),
+                    request.getName(),
+                    authors,
+                    books
+            );
+
+            genre = genreRepository.save(genre);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(genre.toGenreDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -83,52 +82,66 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public ResponseEntity readById(Long id) {
         // Поиск жанра по id
-        Optional<Genre> genreById = genreRepository.findById(id);
+        Optional<Genre> foundGenre = genreRepository.findById(id);
 
-        if (genreById.isEmpty()) {
+        if (foundGenre.isEmpty()) {
             // Если не найден жанр
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        Genre genre = genreById.get();
+//        Genre genre = foundGenre.get();
 
-        GenreDTO genreDTO = genreConvertor.convertToGenreDTO(genre);
+//        GenreDTO genreDTO = genreConvertor.convertToGenreDTO(genre);
+//
+//        List<Long> authorIds = new ArrayList<>();
+//        List<Long> bookIds = new ArrayList<>();
+//        genre.getAuthors().forEach(author -> authorIds.add(author.getId()));
+//        genre.getBooks().forEach(book -> bookIds.add(book.getId()));
+//
+//        genreDTO.setAuthorsId(authorIds);
+//        genreDTO.setBooksId(bookIds);
 
-        List<Long> authorIds = new ArrayList<>();
-        List<Long> bookIds = new ArrayList<>();
-        genre.getAuthors().forEach(author -> authorIds.add(author.getId()));
-        genre.getBooks().forEach(book -> bookIds.add(book.getId()));
-
-        genreDTO.setAuthorsId(authorIds);
-        genreDTO.setBooksId(bookIds);
-
-        return new ResponseEntity(genreDTO, HttpStatus.OK);
+        return new ResponseEntity(foundGenre.map(Genre::toGenreDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-//        return genreRepository.findAll()
-//                .stream()
-//                .map(genreConvertor::convertToGenreDTO)
-//                .collect(Collectors.toList());
-        return null;
+        List<Genre> genres = genreRepository.findAll();
+        if (genres.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_GENRES);
+        }
+
+        return new ResponseEntity(
+                genres.stream()
+                        .map(Genre::toGenreDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity update(Long id, GenreDTO updatedGenreDTO) {
+    public ResponseEntity update(Long id, GenreRequest request) {
         // проверка параметров запроса
-        checkParameters(id, updatedGenreDTO);
+        checkParameters(id, request);
 
         // Поиск жанра по id
-        Optional<Genre> genre = genreRepository.findById(id);
+        Optional<Genre> foundGenre = genreRepository.findById(id);
 
-        if (genre.isPresent()) {
+        if (foundGenre.isPresent()) {
             // Если найден, обновляем жанр
-            genreRepository.save(genreConvertor.convertToGenre(updatedGenreDTO));
+            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
+            List<Book> books = bookRepository.findBookByIdIn(request.getBooksId());
+
+            Genre genre = new Genre(
+                    request.getId(),
+                    request.getName(),
+                    authors,
+                    books
+            );
+
+            genre = genreRepository.save(genre);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(genre.toGenreDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -157,18 +170,18 @@ public class GenreServiceImpl implements GenreService {
         }
     }
 
-    protected void checkParameters(GenreDTO genreDTO) {
-        notNull(genreDTO.getName(), "Name is undefined");
-        if (genreDTO.getAuthorsId().isEmpty()) {
+    protected void checkParameters(GenreRequest request) {
+        notNull(request.getName(), "Name is undefined");
+        if (request.getAuthorsId().isEmpty()) {
             throw new ClientBadRequestException("List of authors id is empty");
         }
-        if (genreDTO.getBooksId().isEmpty()) {
+        if (request.getBooksId().isEmpty()) {
             throw new ClientBadRequestException("List of books id is empty");
         }
     }
 
-    protected void checkParameters(Long id, GenreDTO genreDTO) {
+    protected void checkParameters(Long id, GenreRequest request) {
         notNull(id, "Id is undefined");
-        checkParameters(genreDTO);
+        checkParameters(request);
     }
 }

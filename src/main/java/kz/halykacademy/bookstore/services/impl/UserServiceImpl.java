@@ -7,7 +7,6 @@ import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.User;
 import kz.halykacademy.bookstore.repositories.UserRepository;
 import kz.halykacademy.bookstore.services.UserService;
-import kz.halykacademy.bookstore.utils.convertor.UserConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +28,10 @@ public class UserServiceImpl implements UserService {
     private final String MESSAGE_LIST_USERS = "List of users are empty";
 
     private final UserRepository userRepository;
-    private final UserConvertor userConvertor;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserConvertor userConvertor) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.userConvertor = userConvertor;
     }
 
     @Override

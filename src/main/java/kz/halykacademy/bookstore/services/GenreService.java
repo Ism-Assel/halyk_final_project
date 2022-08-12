@@ -1,6 +1,6 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.dto.GenreDTO;
+import kz.halykacademy.bookstore.dto.genre.GenreRequest;
 
-public interface GenreService extends Service<GenreDTO>{
+public interface GenreService extends Service<GenreRequest>{
 }

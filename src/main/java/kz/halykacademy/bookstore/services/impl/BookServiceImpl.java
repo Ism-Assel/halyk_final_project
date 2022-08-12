@@ -100,14 +100,6 @@ public class BookServiceImpl implements BookService {
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-//        Book book = foundBook.get();
-//
-//        BookDTO bookDTO = bookConvertor.convertToBookDTO(book);
-//        List<Long> ids = new ArrayList<>();
-//        book.getAuthors().forEach(author -> ids.add(author.getId()));
-//
-//        bookDTO.setAuthorsId(ids);
-
         return new ResponseEntity(foundBook.map(Book::toBookDto).get(), HttpStatus.OK);
     }
 
