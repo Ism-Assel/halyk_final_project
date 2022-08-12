@@ -1,7 +1,7 @@
 package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
-import kz.halykacademy.bookstore.dto.PublisherDTO;
+import kz.halykacademy.bookstore.dto.publisher.PublisherRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Publisher;
@@ -26,6 +26,7 @@ public class PublisherServiceImpl implements PublisherService {
     private final String MESSAGE_NOT_FOUND = "Publisher is not found with id = %d";
     private final String MESSAGE_SUCCESS = "success";
     private final String MESSAGE_EXISTED = "This publisher is existed";
+    private final String MESSAGE_LIST_PUBLISHERS = "List of publishers are empty";
 
     private final PublisherRepository publisherRepository;
     private final PublisherConvertor publisherConvertor;
@@ -37,25 +38,28 @@ public class PublisherServiceImpl implements PublisherService {
     }
 
     @Override
-    public ResponseEntity create(PublisherDTO publisherDTO) {
+    public ResponseEntity create(PublisherRequest request) {
         // проверка параметров запроса
-        checkParameters(publisherDTO);
-
-        // конвертирование DTO в Entity
-        Publisher publisher = publisherConvertor.convertToPublisher(publisherDTO);
+        checkParameters(request);
 
         // Поиск автора в БД
-        Publisher foundPublisher = publisherRepository.findByName(
-                publisher.getName());
+        Optional<Publisher> foundPublisher = publisherRepository.findByName(
+                request.getName());
 
         // Проверка существует ли автор
-        if (foundPublisher == null) {
+        if (foundPublisher.isEmpty()) {
             // если нет, то создаем
-            publisherRepository.save(publisher);
+            Publisher publisher = new Publisher(
+                    request.getId(),
+                    request.getName(),
+                    null
+            );
+
+            publisher = publisherRepository.save(publisher);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(publisher.toPublisherDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -66,42 +70,50 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     public ResponseEntity readById(Long id) {
         // Поиск издателя по id
-        Optional<Publisher> publisherById = publisherRepository.findById(id);
+        Optional<Publisher> foundPublisher = publisherRepository.findById(id);
 
-        if (publisherById.isEmpty()) {
+        if (foundPublisher.isEmpty()) {
             // Если не найден издатель
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        PublisherDTO publisherDTO = publisherConvertor.convertToPublisherDTO(publisherById.get());
-
-        return new ResponseEntity(publisherDTO, HttpStatus.OK);
+        return new ResponseEntity(foundPublisher.map(Publisher::toPublisherDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-//        return publisherRepository.findAll()
-//                .stream()
-//                .map(publisherConvertor::convertToPublisherDTO)
-//                .collect(Collectors.toList());
-        return null;
+        List<Publisher> publishers = publisherRepository.findAll();
+        if (publishers.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
+        }
+
+        return new ResponseEntity(
+                publishers.stream()
+                        .map(Publisher::toPublisherDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity update(Long id, PublisherDTO updatedPublisherDTO) {
+    public ResponseEntity update(Long id, PublisherRequest request) {
         // проверка параметров запроса
-        checkParameters(id, updatedPublisherDTO);
+        checkParameters(id, request);
 
         // Поиск издателя по id
-        Optional<Publisher> publisher = publisherRepository.findById(id);
+        Optional<Publisher> foundPublisher = publisherRepository.findById(id);
 
-        if (publisher.isPresent()) {
+        if (foundPublisher.isPresent()) {
             // Если найден, обновляем издателя
-            publisherRepository.save(publisherConvertor.convertToPublisher(updatedPublisherDTO));
+            Publisher publisher = new Publisher(
+                    request.getId(),
+                    request.getName(),
+                    null
+            );
+
+            publisher = publisherRepository.save(publisher);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(publisher.toPublisherDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -132,22 +144,26 @@ public class PublisherServiceImpl implements PublisherService {
     }
 
     @Override
-    public List<PublisherDTO> findByNameLike(String name) {
+    public ResponseEntity findByNameLike(String name) {
         notNull(name, "Name is undefined");
 
-        return publisherRepository
-                .findByNameLikeIgnoreCase("%" + name + "%")
-                .stream()
-                .map(publisherConvertor::convertToPublisherDTO)
-                .collect(Collectors.toList());
+        List<Publisher> publishers = publisherRepository.findByNameLikeIgnoreCase("%" + name + "%");
+        if (publishers.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
+        }
+
+        return new ResponseEntity(
+                publishers.stream()
+                        .map(Publisher::toPublisherDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    protected void checkParameters(Long id, PublisherDTO publisherDTO) {
+    protected void checkParameters(Long id, PublisherRequest request) {
         notNull(id, "Id is undefined");
-        checkParameters(publisherDTO);
+        checkParameters(request);
     }
 
-    protected void checkParameters(PublisherDTO publisherDTO) {
-        notNull(publisherDTO.getName(), "Name is undefined");
+    protected void checkParameters(PublisherRequest request) {
+        notNull(request.getName(), "Name is undefined");
     }
 }

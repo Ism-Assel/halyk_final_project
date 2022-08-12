@@ -1,12 +1,10 @@
 package kz.halykacademy.bookstore.controllers;
 
-import kz.halykacademy.bookstore.dto.PublisherDTO;
+import kz.halykacademy.bookstore.dto.publisher.PublisherRequest;
 import kz.halykacademy.bookstore.services.PublisherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/publishers")
@@ -29,13 +27,13 @@ public class PublisherController {
     }
 
     @PostMapping
-    public ResponseEntity post(@RequestBody PublisherDTO publisherDTO) {
-       return publisherService.create(publisherDTO);
+    public ResponseEntity post(@RequestBody PublisherRequest request) {
+       return publisherService.create(request);
     }
 
     @PutMapping
-    public ResponseEntity put(@RequestBody PublisherDTO publisherDTO) {
-       return publisherService.update(publisherDTO.getId(), publisherDTO);
+    public ResponseEntity put(@RequestBody PublisherRequest request) {
+       return publisherService.update(request.getId(), request);
     }
 
     @DeleteMapping("/{id}")
@@ -44,7 +42,7 @@ public class PublisherController {
     }
 
     @GetMapping("/searchByName")
-    public List<PublisherDTO> getByName(@RequestParam(name = "name") String name) {
+    public ResponseEntity getByName(@RequestParam(name = "name") String name) {
         return publisherService.findByNameLike(name);
 
     }

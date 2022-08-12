@@ -1,10 +1,9 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.dto.PublisherDTO;
+import kz.halykacademy.bookstore.dto.publisher.PublisherRequest;
+import org.springframework.http.ResponseEntity;
 
-import java.util.List;
+public interface PublisherService extends Service<PublisherRequest>{
 
-public interface PublisherService extends Service<PublisherDTO>{
-
-    List<PublisherDTO> findByNameLike(String name);
+    ResponseEntity findByNameLike(String name);
 }
