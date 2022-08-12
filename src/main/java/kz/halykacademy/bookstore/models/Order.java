@@ -54,14 +54,12 @@ public class Order {
             bookResponses = this.books.stream().map(Book::toBookDto).collect(Collectors.toList());
         }
 
-//        UserResponse userResponse = new UserResponse( // todo вернуть в security
-//                user.getId(),
-//                user.getLogin(),
-//                "",
-//                user.getRole(),
-//                user.getIsBlocked()
-//        );
-        UserResponse userResponse = new UserResponse();
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getLogin(),
+                user.getRole(),
+                user.getIsBlocked()
+        );
 
         return new OrderResponse(
                 this.id,

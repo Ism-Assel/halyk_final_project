@@ -10,3 +10,6 @@ flyway.url=
 flyway.schemas=
 flyway.user=
 flyway.password=
+
+server.servlet.context-path=
+jwt_secret=

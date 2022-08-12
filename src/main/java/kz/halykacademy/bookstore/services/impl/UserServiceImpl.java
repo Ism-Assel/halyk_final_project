@@ -10,6 +10,7 @@ import kz.halykacademy.bookstore.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +29,12 @@ public class UserServiceImpl implements UserService {
     private final String MESSAGE_LIST_USERS = "List of users are empty";
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -47,7 +50,7 @@ public class UserServiceImpl implements UserService {
             User user = new User(
                     request.getId(),
                     request.getLogin(),
-                    request.getPassword(),
+                    passwordEncoder.encode(request.getPassword()),
                     request.getRole(),
                     request.getIsBlocked(),
                     null
@@ -104,7 +107,7 @@ public class UserServiceImpl implements UserService {
             User user = new User(
                     request.getId(),
                     request.getLogin(),
-                    request.getPassword(),
+                    passwordEncoder.encode(request.getPassword()),
                     request.getRole(),
                     request.getIsBlocked(),
                     null

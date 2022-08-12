@@ -9,6 +9,7 @@ import kz.halykacademy.bookstore.models.Book;
 import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.services.AuthorService;
+import kz.halykacademy.bookstore.utils.BlockedUserChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,6 +80,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public ResponseEntity readById(Long id) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         // Поиск автора по id
         Optional<Author> foundAuthor = authorRepository.findById(id);
 
@@ -92,6 +96,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public ResponseEntity readAll() {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         List<Author> authors = authorRepository.findAll();
         if (authors.isEmpty()) {
             throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
@@ -105,7 +112,6 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public ResponseEntity update(Long id, AuthorRequest request) {
-
         // проверка параметров запроса
         checkParameters(id, request);
 
@@ -159,7 +165,10 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public ResponseEntity findByNameOrSurnameOrLastnameLike(String fio) {
-        notNull(fio, "FIO is empty");
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
+        notNull(fio, "FIO is empty"); // like '[%]'
 
         String fioLike = "%" + fio + "%";
 
@@ -174,6 +183,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public ResponseEntity findByGenres(String genres) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         String[] genresAsArray = genres.split(",");
         genresAsArray =
                 Arrays.stream(genresAsArray)

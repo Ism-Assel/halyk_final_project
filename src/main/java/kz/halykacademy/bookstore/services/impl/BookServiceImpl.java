@@ -11,6 +11,7 @@ import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.PublisherRepository;
 import kz.halykacademy.bookstore.services.BookService;
+import kz.halykacademy.bookstore.utils.BlockedUserChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,6 +88,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public ResponseEntity readById(Long id) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         // Поиск книги по id
         Optional<Book> foundBook = bookRepository.findById(id);
 
@@ -100,6 +104,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public ResponseEntity readAll() {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         List<Book> books = bookRepository.findAll();
         if (books.isEmpty()) {
             throw new ClientBadRequestException(MESSAGE_LIST_BOOKS);
@@ -171,6 +178,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public ResponseEntity findByTitle(String title) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         notNull(title, "Title is undefined");
 
         List<Book> books = bookRepository
@@ -188,6 +198,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public ResponseEntity findByGenres(String genres) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         String[] genresAsArray = genres.split(",");
         genresAsArray =
                 Arrays.stream(genresAsArray)

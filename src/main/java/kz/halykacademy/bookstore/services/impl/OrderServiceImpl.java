@@ -7,11 +7,13 @@ import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Book;
 import kz.halykacademy.bookstore.models.Order;
+import kz.halykacademy.bookstore.models.User;
 import kz.halykacademy.bookstore.models.enums.OrderStatus;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.OrderRepository;
 import kz.halykacademy.bookstore.repositories.UserRepository;
 import kz.halykacademy.bookstore.services.OrderService;
+import kz.halykacademy.bookstore.utils.BlockedUserChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,21 +55,27 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ResponseEntity create(OrderUserRequest request) {
-            // проверка параметров запроса
-            checkParameters(request);
+        // проверяем заблокирован ли пользователь
+        User user = BlockedUserChecker.checkBlockedUser();
 
-            // подготовка заказа
-            Order order = prepareOrder(request, null);
+        // проверка параметров запроса
+        checkParameters(request);
 
-            // сохранение заказа
-            order = orderRepository.save(order);
+        // подготовка заказа
+        Order order = prepareOrder(request, null, user);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(order.toOrderDto());
+        // сохранение заказа
+        order = orderRepository.save(order);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(order.toOrderDto());
     }
 
     public ResponseEntity readById(Long id) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         // Поиск order по id
         Optional<Order> foundOrder = orderRepository.findById(id);
 
@@ -81,6 +89,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ResponseEntity readAll() {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         List<Order> orders = orderRepository.findAll();
         if (orders.isEmpty()) {
             throw new ClientBadRequestException(MESSAGE_LIST_ORDERS);
@@ -94,6 +105,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ResponseEntity update(Long id, OrderUserRequest request) {
+        // проверяем заблокирован ли пользователь
+        User user = BlockedUserChecker.checkBlockedUser();
+
         // проверка параметров запроса
         checkParameters(id, request);
 
@@ -102,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (foundOrder.isPresent()) {
             // Если найден, обновляем order
-            Order order = prepareOrder(request, foundOrder.get());
+            Order order = prepareOrder(request, foundOrder.get(), user);
 
             order = orderRepository.save(order);
 
@@ -169,14 +183,23 @@ public class OrderServiceImpl implements OrderService {
         return books;
     }
 
-    protected Order prepareOrder(OrderUserRequest request, Order order) {
+    protected Order prepareOrder(OrderUserRequest request, Order order, User user) {
         OrderAdminRequest adminRequest = null;
         boolean isAdmin = false;
+
         if (request instanceof OrderAdminRequest) {
             adminRequest = (OrderAdminRequest) request;
             isAdmin = true;
         }
 
+        if (order != null
+                && user.getRole().equals("USER")
+                && !order.getUser().getId().equals(user.getId())
+        ) {
+            throw new ClientBadRequestException("This order doesn't access to the current user");
+        }
+
+        // определение статуса заказа для User/Admin
         OrderStatus status = order != null ? order.getStatus() : OrderStatus.CREATED;
         if (isAdmin) {
             status = OrderStatus.valueOf(adminRequest.getStatus());
@@ -185,29 +208,12 @@ public class OrderServiceImpl implements OrderService {
         // проверка общей суммы заказа и возращение списка книг
         List<Book> books = checkOrderPriceAndGetBooks(request);
 
-        // проверка user на блокировку
-//        User user = checkUser(orderDTO);
-
         return new Order(
                 request.getId(),
                 books,
                 status,
                 order != null ? order.getCreatedAt() : null,
-                null
+                order != null ? order.getUser() : user
         );
     }
-
-//    protected User checkUser(OrderDTO orderDTO) {
-//        Optional<User> user = userRepository.findById(orderDTO.getUserId());
-//
-//        if (user.isEmpty()) {
-//            throw new ClientBadRequestException(String.format(MESSAGE_USER_NOT_FOUND, orderDTO.getUserId()));
-//        }
-//
-//        if (user.get().getIsBlocked()) {
-//            throw new ClientBadRequestException(MESSAGE_IS_BLOCKED);
-//        }
-//
-//        return user.get();
-//    }
 }

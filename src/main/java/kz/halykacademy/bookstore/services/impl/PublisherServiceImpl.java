@@ -7,6 +7,7 @@ import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Publisher;
 import kz.halykacademy.bookstore.repositories.PublisherRepository;
 import kz.halykacademy.bookstore.services.PublisherService;
+import kz.halykacademy.bookstore.utils.BlockedUserChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,9 @@ public class PublisherServiceImpl implements PublisherService {
 
     @Override
     public ResponseEntity readById(Long id) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         // Поиск издателя по id
         Optional<Publisher> foundPublisher = publisherRepository.findById(id);
 
@@ -79,6 +83,9 @@ public class PublisherServiceImpl implements PublisherService {
 
     @Override
     public ResponseEntity readAll() {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         List<Publisher> publishers = publisherRepository.findAll();
         if (publishers.isEmpty()) {
             throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
@@ -142,6 +149,9 @@ public class PublisherServiceImpl implements PublisherService {
 
     @Override
     public ResponseEntity findByNameLike(String name) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         notNull(name, "Name is undefined");
 
         List<Publisher> publishers = publisherRepository.findByNameLikeIgnoreCase("%" + name + "%");

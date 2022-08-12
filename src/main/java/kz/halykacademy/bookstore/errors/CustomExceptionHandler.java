@@ -30,4 +30,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ModelResponseDTO(e.getMessage()));
     }
+
+    @ExceptionHandler(value = ForbiddenException.class)
+    protected ResponseEntity handleBadRequest(ForbiddenException e) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ModelResponseDTO(e.getMessage()));
+    }
 }

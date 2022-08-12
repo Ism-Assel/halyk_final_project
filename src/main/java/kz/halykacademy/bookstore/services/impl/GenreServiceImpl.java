@@ -11,6 +11,7 @@ import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.GenreRepository;
 import kz.halykacademy.bookstore.services.GenreService;
+import kz.halykacademy.bookstore.utils.BlockedUserChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -81,6 +82,9 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public ResponseEntity readById(Long id) {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         // Поиск жанра по id
         Optional<Genre> foundGenre = genreRepository.findById(id);
 
@@ -94,6 +98,9 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public ResponseEntity readAll() {
+        // проверяем заблокирован ли пользователь
+        BlockedUserChecker.checkBlockedUser();
+
         List<Genre> genres = genreRepository.findAll();
         if (genres.isEmpty()) {
             throw new ClientBadRequestException(MESSAGE_LIST_GENRES);
