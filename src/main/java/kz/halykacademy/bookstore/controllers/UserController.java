@@ -1,6 +1,6 @@
 package kz.halykacademy.bookstore.controllers;
 
-import kz.halykacademy.bookstore.dto.UserDTO;
+import kz.halykacademy.bookstore.dto.user.UserRequest;
 import kz.halykacademy.bookstore.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +27,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity post(@RequestBody UserDTO userDTO) {
-        return userService.create((userDTO));
+    public ResponseEntity post(@RequestBody UserRequest request) {
+        return userService.create((request));
     }
 
     @PutMapping
-    public ResponseEntity put(@RequestBody UserDTO userDTO) {
-       return userService.update(userDTO.getId(), userDTO);
+    public ResponseEntity put(@RequestBody UserRequest request) {
+       return userService.update(request.getId(), request);
     }
 
     @DeleteMapping("/{id}")

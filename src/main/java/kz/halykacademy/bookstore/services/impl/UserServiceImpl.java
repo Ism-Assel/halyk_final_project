@@ -1,7 +1,7 @@
 package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
-import kz.halykacademy.bookstore.dto.UserDTO;
+import kz.halykacademy.bookstore.dto.user.UserRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.User;
@@ -14,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
 
@@ -24,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private final String MESSAGE_NOT_FOUND = "User is not found with id = %d";
     private final String MESSAGE_SUCCESS = "success";
     private final String MESSAGE_EXISTED = "This user is existed";
+    private final String MESSAGE_LIST_USERS = "List of users are empty";
 
     private final UserRepository userRepository;
     private final UserConvertor userConvertor;
@@ -35,23 +38,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity create(UserDTO userDTO) {
+    public ResponseEntity create(UserRequest request) {
         // проверка параметров запроса
-        checkParameters(userDTO);
-
-        // конвертирование DTO в Entity
-        User user = userConvertor.convertToUser(userDTO);
+        checkParameters(request);
 
         // Поиск user в БД
-        User foundUser = userRepository.findByLogin(user.getLogin());
+        Optional<User> foundUser = userRepository.findByLogin(request.getLogin());
 
         // Проверка существует ли user
-        if (foundUser == null) {
-            userRepository.save(user);
+        if (foundUser.isEmpty()) {
+            User user = new User(
+                    request.getId(),
+                    request.getLogin(),
+                    request.getPassword(),
+                    request.getRole(),
+                    request.getIsBlocked(),
+                    null
+            );
+
+            user = userRepository.save(user);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(user.toUserDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -62,42 +71,53 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity readById(Long id) {
         // Поиск user по id
-        Optional<User> userById = userRepository.findById(id);
+        Optional<User> foundUser = userRepository.findById(id);
 
-        if (userById.isEmpty()) {
+        if (foundUser.isEmpty()) {
             // Если не найден user
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        UserDTO userDTO = userConvertor.convertToUserDTO(userById.get());
-
-        return new ResponseEntity(userDTO, HttpStatus.OK);
+        return new ResponseEntity(foundUser.map(User::toUserDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-//        return userRepository.findAll()
-//                .stream()
-//                .map(userConvertor::convertToUserDTO)
-//                .collect(Collectors.toList());
-        return null;
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_USERS);
+        }
+
+        return new ResponseEntity(
+                users.stream()
+                        .map(User::toUserDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity update(Long id, UserDTO updatedUserDTO) {
+    public ResponseEntity update(Long id, UserRequest request) {
         // проверка параметров запроса
-        checkParameters(id, updatedUserDTO);
+        checkParameters(id, request);
 
         // Поиск user по id
-        Optional<User> userById = userRepository.findById(id);
+        Optional<User> foundUser = userRepository.findById(id);
 
-        if (userById.isPresent()) {
+        if (foundUser.isPresent()) {
             // Если найден, обновляем user
-            userRepository.save(userConvertor.convertToUser(updatedUserDTO));
+            User user = new User(
+                    request.getId(),
+                    request.getLogin(),
+                    request.getPassword(),
+                    request.getRole(),
+                    request.getIsBlocked(),
+                    null
+            );
+
+            user = userRepository.save(user);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(user.toUserDto());
 
         } else {
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
@@ -125,15 +145,15 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    protected void checkParameters(Long id, UserDTO userDTO) {
+    protected void checkParameters(Long id, UserRequest request) {
         notNull(id, "Id is undefined");
-        checkParameters(userDTO);
+        checkParameters(request);
     }
 
-    protected void checkParameters(UserDTO userDTO) {
-        notNull(userDTO.getLogin(), "Login is undefined");
-        notNull(userDTO.getPassword(), "Password is undefined");
-        notNull(userDTO.getRole(), "Role is undefined");
-        notNull(userDTO.getIsBlocked(), "Blocked is empty");
+    protected void checkParameters(UserRequest request) {
+        notNull(request.getLogin(), "Login is undefined");
+        notNull(request.getPassword(), "Password is undefined");
+        notNull(request.getRole(), "Role is undefined");
+        notNull(request.getIsBlocked(), "Blocked is empty");
     }
 }

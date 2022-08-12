@@ -1,6 +1,6 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.dto.UserDTO;
+import kz.halykacademy.bookstore.dto.user.UserRequest;
 
-public interface UserService extends Service<UserDTO>{
+public interface UserService extends Service<UserRequest>{
 }
