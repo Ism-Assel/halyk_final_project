@@ -1,7 +1,6 @@
 package kz.halykacademy.bookstore.models;
 
 import kz.halykacademy.bookstore.dto.author.AuthorResponse;
-import kz.halykacademy.bookstore.dto.book.BookResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,6 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "author")
@@ -52,12 +50,6 @@ public class Author {
     private List<Genre> genres = new ArrayList<>();
 
     public AuthorResponse toAuthorDto() {
-        List<BookResponse> bookResponses = List.of();
-
-        if (this.books != null) {
-            bookResponses = this.books.stream().map(Book::toBookDto).collect(Collectors.toList());
-        }
-
         return new AuthorResponse(
                 this.id,
                 this.name,

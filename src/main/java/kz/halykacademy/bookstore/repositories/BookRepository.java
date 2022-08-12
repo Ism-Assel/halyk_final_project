@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
@@ -16,7 +17,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query(value = "select b from Book b join b.genres g where g.name in :genres order by g.name ")
     List<Book> findBookByGenres(@Param("genres") String[] genres);
 
-    Book findByTitle(String title);
+    Optional<Book> findByTitle(String title);
 
     List<Book> findBookByIdIn(List<Long> id);
 }

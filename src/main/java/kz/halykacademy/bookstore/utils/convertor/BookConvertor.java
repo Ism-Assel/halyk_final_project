@@ -5,7 +5,7 @@ import kz.halykacademy.bookstore.models.Book;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+@Deprecated
 @Component
 public class BookConvertor {
     private final ModelMapper modelMapper;

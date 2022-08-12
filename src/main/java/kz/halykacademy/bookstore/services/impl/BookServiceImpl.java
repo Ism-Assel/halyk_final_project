@@ -2,6 +2,7 @@ package kz.halykacademy.bookstore.services.impl;
 
 import kz.halykacademy.bookstore.dto.BookDTO;
 import kz.halykacademy.bookstore.dto.ModelResponseDTO;
+import kz.halykacademy.bookstore.dto.book.BookRequest;
 import kz.halykacademy.bookstore.errors.ClientBadRequestException;
 import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.Author;
@@ -18,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +32,7 @@ public class BookServiceImpl implements BookService {
     private final String MESSAGE_NOT_FOUND = "Book is not found with id = %d";
     private final String MESSAGE_SUCCESS = "success";
     private final String MESSAGE_EXISTED = "This book is existed";
+    private final String MESSAGE_LIST_BOOKS = "List of books are empty";
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
@@ -52,31 +53,36 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public ResponseEntity create(BookDTO bookDTO) {
+    public ResponseEntity create(BookRequest request) {
         // проверка параметров запроса
-        checkParameters(bookDTO);
-
-        // конвертирование DTO в Entity
-        Book book = bookConvertor.convertToBook(bookDTO);
-
-        List<Author> authors = authorRepository.findAuthorByIdIn(bookDTO.getAuthorsId());
-
-        Optional<Publisher> publisher = publisherRepository.findById(bookDTO.getPublisherId());
-
-        book.setAuthors(authors);
-        book.setPublisher(publisher.get());
+        checkParameters(request);
 
         // Поиск книги в БД
-        Book foundBook = bookRepository.findByTitle(book.getTitle());
+        Optional<Book> foundBook = bookRepository.findByTitle(request.getTitle());
 
         // Проверка существует ли книга
-        if (foundBook == null) {
+        if (foundBook.isEmpty()) {
             // если нет, то создаем
-            bookRepository.save(book);
+            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
+
+            Optional<Publisher> publisher = publisherRepository.findById(request.getPublisherId());
+
+            Book book = new Book(
+                    request.getId(),
+                    request.getPrice(),
+                    authors,
+                    publisher.get(),
+                    request.getTitle(),
+                    request.getPages(),
+                    request.getPublicationYear(),
+                    null
+            );
+
+            book = bookRepository.save(book);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(book.toBookDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -87,48 +93,67 @@ public class BookServiceImpl implements BookService {
     @Override
     public ResponseEntity readById(Long id) {
         // Поиск книги по id
-        Optional<Book> bookById = bookRepository.findById(id);
+        Optional<Book> foundBook = bookRepository.findById(id);
 
-        if (bookById.isEmpty()) {
+        if (foundBook.isEmpty()) {
             // Если не найдена книга
             throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
         }
 
-        Book book = bookById.get();
+//        Book book = foundBook.get();
+//
+//        BookDTO bookDTO = bookConvertor.convertToBookDTO(book);
+//        List<Long> ids = new ArrayList<>();
+//        book.getAuthors().forEach(author -> ids.add(author.getId()));
+//
+//        bookDTO.setAuthorsId(ids);
 
-        BookDTO bookDTO = bookConvertor.convertToBookDTO(book);
-        List<Long> ids = new ArrayList<>();
-        book.getAuthors().forEach(author -> ids.add(author.getId()));
-
-        bookDTO.setAuthorsId(ids);
-
-        return new ResponseEntity(bookDTO, HttpStatus.OK);
+        return new ResponseEntity(foundBook.map(Book::toBookDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-//        return bookRepository.findAll()
-//                .stream()
-//                .map(bookConvertor::convertToBookDTO)
-//                .collect(Collectors.toList());
-        return null;
+        List<Book> books = bookRepository.findAll();
+        if (books.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_BOOKS);
+        }
+
+        return new ResponseEntity(
+                books.stream()
+                        .map(Book::toBookDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity update(Long id, BookDTO updatedBookDTO) {
+    public ResponseEntity update(Long id, BookRequest request) {
         // проверка параметров запроса
-        checkParameters(id, updatedBookDTO);
+        checkParameters(id, request);
 
         // Поиск книги по id
-        Optional<Book> book = bookRepository.findById(id);
+        Optional<Book> foundBook = bookRepository.findById(id);
 
-        if (book.isPresent()) {
+        if (foundBook.isPresent()) {
             // Если найден, обновляем книгу
-            bookRepository.save(bookConvertor.convertToBook(updatedBookDTO));
+            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
+
+            Optional<Publisher> publisher = publisherRepository.findById(request.getPublisherId());
+
+            Book book = new Book(
+                    request.getId(),
+                    request.getPrice(),
+                    authors,
+                    publisher.get(),
+                    request.getTitle(),
+                    request.getPages(),
+                    request.getPublicationYear(),
+                    null
+            );
+
+            book = bookRepository.save(book);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                    .body(book.toBookDto());
 
         } else {
             // иначе выводим сообщение пользователю
@@ -158,14 +183,20 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDTO> findByTitle(String title) {
+    public ResponseEntity findByTitle(String title) {
         notNull(title, "Title is undefined");
 
-        return bookRepository
-                .findByTitleLikeIgnoreCase("%" + title + "%")
-                .stream()
-                .map(bookConvertor::convertToBookDTO)
-                .collect(Collectors.toList());
+        List<Book> books = bookRepository
+                .findByTitleLikeIgnoreCase("%" + title + "%");
+
+        if (books.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_BOOKS);
+        }
+
+        return new ResponseEntity(
+                books.stream()
+                        .map(Book::toBookDto)
+                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
@@ -184,17 +215,19 @@ public class BookServiceImpl implements BookService {
         return new ResponseEntity(books, HttpStatus.OK);
     }
 
-    protected void checkParameters(BookDTO bookDTO) {
-        notNull(bookDTO.getTitle(), "Title is undefined");
-        notNull(bookDTO.getPrice(), "Price is undefined");
-        notNull(bookDTO.getPages(), "Pages is undefined");
-        bookDTO.getAuthorsId().forEach(id -> notNull(id, "Author's id is undefined"));
-        notNull(bookDTO.getPublisherId(), "Publisher's id is undefined");
-        notNull(bookDTO.getPublicationYear(), "Year of publication is undefined");
+    protected void checkParameters(BookRequest request) {
+        notNull(request.getTitle(), "Title is undefined");
+        notNull(request.getPrice(), "Price is undefined");
+        notNull(request.getPages(), "Pages is undefined");
+        if (request.getAuthorsId().isEmpty()) {
+            throw new ClientBadRequestException("List of authors id is empty");
+        }
+        notNull(request.getPublisherId(), "Publisher's id is undefined");
+        notNull(request.getPublicationYear(), "Year of publication is undefined");
     }
 
-    protected void checkParameters(Long id, BookDTO bookDTO) {
+    protected void checkParameters(Long id, BookRequest request) {
         notNull(id, "Id is undefined");
-        checkParameters(bookDTO);
+        checkParameters(request);
     }
 }

@@ -1,6 +1,8 @@
 package kz.halykacademy.bookstore.models;
 
+import kz.halykacademy.bookstore.dto.author.AuthorResponse;
 import kz.halykacademy.bookstore.dto.book.BookResponse;
+import kz.halykacademy.bookstore.dto.publisher.PublisherResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +11,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "book")
@@ -53,6 +56,25 @@ public class Book {
     private List<Genre> genres = new ArrayList<>();
 
     public BookResponse toBookDto() {
-        return new BookResponse();
+        List<AuthorResponse> authorResponses = List.of();
+
+        if (this.authors != null) {
+            authorResponses = this.authors.stream().map(Author::toAuthorDto).collect(Collectors.toList());
+        }
+
+        PublisherResponse publisherResponse = null;
+        if (this.publisher != null) {
+            publisherResponse = this.publisher.toPublisherDto();
+        }
+
+        return new BookResponse(
+                this.id,
+                this.title,
+                this.price,
+                this.pages,
+                authorResponses,
+                publisherResponse,
+                this.publicationYear
+        );
     }
 }

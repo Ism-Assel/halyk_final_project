@@ -1,8 +1,12 @@
 package kz.halykacademy.bookstore.dto.book;
 
+import kz.halykacademy.bookstore.dto.author.AuthorResponse;
+import kz.halykacademy.bookstore.dto.publisher.PublisherResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -12,8 +16,8 @@ public class BookResponse {
     private String title;
     private Double price;
     private Integer pages;
-//    private List<Long> authorsId; todo AuthorResponse
-//    private Long publisherId; todo PublisherResponse
+    private List<AuthorResponse> authors;
+    private PublisherResponse publisher;
     private String publicationYear;
 //    private List<GenreDTO> genres; todo GenreResponse
 }

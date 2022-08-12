@@ -1,12 +1,10 @@
 package kz.halykacademy.bookstore.controllers;
 
-import kz.halykacademy.bookstore.dto.BookDTO;
+import kz.halykacademy.bookstore.dto.book.BookRequest;
 import kz.halykacademy.bookstore.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/books")
@@ -29,13 +27,13 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity post(@RequestBody BookDTO bookDTO) {
-       return bookService.create(bookDTO);
+    public ResponseEntity post(@RequestBody BookRequest request) {
+       return bookService.create(request);
     }
 
     @PutMapping
-    public ResponseEntity put(@RequestBody BookDTO bookDTO) {
-        return bookService.update(bookDTO.getId(), bookDTO);
+    public ResponseEntity put(@RequestBody BookRequest request) {
+        return bookService.update(request.getId(), request);
     }
 
     @DeleteMapping("/{id}")
@@ -44,7 +42,7 @@ public class BookController {
     }
 
     @GetMapping("/searchByTitle")
-    public List<BookDTO> getByTitle(@RequestParam(name = "title") String title) {
+    public ResponseEntity getByTitle(@RequestParam(name = "title") String title) {
         return bookService.findByTitle(title);
     }
 
