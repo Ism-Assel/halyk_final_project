@@ -79,11 +79,12 @@ public class PublisherServiceImpl implements PublisherService {
     }
 
     @Override
-    public List<PublisherDTO> readAll() {
-        return publisherRepository.findAll()
-                .stream()
-                .map(publisherConvertor::convertToPublisherDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity readAll() {
+//        return publisherRepository.findAll()
+//                .stream()
+//                .map(publisherConvertor::convertToPublisherDTO)
+//                .collect(Collectors.toList());
+        return null;
     }
 
     @Override

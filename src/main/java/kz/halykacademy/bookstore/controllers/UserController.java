@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -19,7 +17,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDTO> getAll() {
+    public ResponseEntity getAll() {
         return userService.readAll();
     }
 

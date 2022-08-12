@@ -106,11 +106,12 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDTO> readAll() {
-        return bookRepository.findAll()
-                .stream()
-                .map(bookConvertor::convertToBookDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity readAll() {
+//        return bookRepository.findAll()
+//                .stream()
+//                .map(bookConvertor::convertToBookDTO)
+//                .collect(Collectors.toList());
+        return null;
     }
 
     @Override

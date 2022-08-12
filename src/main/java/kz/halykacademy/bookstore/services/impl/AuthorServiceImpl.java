@@ -89,12 +89,13 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public List<AuthorDTO> readAll() {
-        return authorRepository
-                .findAll()
-                .stream()
-                .map(authorConvertor::convertToAuthorDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity readAll() {
+//        return authorRepository
+//                .findAll()
+//                .stream()
+//                .map(authorConvertor::convertToAuthorDTO)
+//                .collect(Collectors.toList());
+        return null;
     }
 
     @Override

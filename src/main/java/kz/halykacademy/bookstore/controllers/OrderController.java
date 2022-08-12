@@ -1,12 +1,11 @@
 package kz.halykacademy.bookstore.controllers;
 
-import kz.halykacademy.bookstore.dto.OrderDTO;
+import kz.halykacademy.bookstore.dto.order.OrderAdminRequest;
+import kz.halykacademy.bookstore.dto.order.OrderUserRequest;
 import kz.halykacademy.bookstore.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
@@ -19,7 +18,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<OrderDTO> getAll() {
+    public ResponseEntity getAll() {
         return orderService.readAll();
     }
 
@@ -28,14 +27,24 @@ public class OrderController {
         return orderService.readById(id);
     }
 
-    @PostMapping
-    public ResponseEntity post(@RequestBody OrderDTO orderDTO) {
-        return orderService.create(orderDTO);
+    @PostMapping("/user")
+    public ResponseEntity post(@RequestBody OrderUserRequest request) {
+        return orderService.create(request);
     }
 
-    @PutMapping
-    public ResponseEntity put(@RequestBody OrderDTO orderDTO) {
-       return orderService.update(orderDTO.getId(), orderDTO);
+    @PostMapping("/admin")
+    public ResponseEntity post(@RequestBody OrderAdminRequest request) {
+        return orderService.create(request);
+    }
+
+    @PutMapping("/user")
+    public ResponseEntity put(@RequestBody OrderUserRequest request) {
+       return orderService.update(request.getId(), request);
+    }
+
+    @PutMapping("/admin")
+    public ResponseEntity put(@RequestBody OrderAdminRequest request) {
+        return orderService.update(request.getId(), request);
     }
 
     @DeleteMapping("/{id}")

@@ -14,9 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
 
@@ -77,11 +75,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> readAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(userConvertor::convertToUserDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity readAll() {
+//        return userRepository.findAll()
+//                .stream()
+//                .map(userConvertor::convertToUserDTO)
+//                .collect(Collectors.toList());
+        return null;
     }
 
     @Override

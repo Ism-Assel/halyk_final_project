@@ -19,7 +19,7 @@ public class PublisherController {
     }
 
     @GetMapping
-    public List<PublisherDTO> getAll() {
+    public ResponseEntity getAll() {
         return publisherService.readAll();
     }
 

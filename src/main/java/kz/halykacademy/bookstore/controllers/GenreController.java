@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/genres")
 public class GenreController {
@@ -19,7 +17,7 @@ public class GenreController {
     }
 
     @GetMapping
-    public List<GenreDTO> getAll() {
+    public ResponseEntity getAll() {
         return genreService.readAll();
     }
 

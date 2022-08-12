@@ -1,6 +1,6 @@
 package kz.halykacademy.bookstore.services;
 
-import kz.halykacademy.bookstore.dto.OrderDTO;
+import kz.halykacademy.bookstore.dto.order.OrderUserRequest;
 
-public interface OrderService extends Service<OrderDTO>{
+public interface OrderService extends Service<OrderUserRequest>{
 }

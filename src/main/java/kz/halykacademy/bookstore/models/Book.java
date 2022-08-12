@@ -1,11 +1,13 @@
 package kz.halykacademy.bookstore.models;
 
+import kz.halykacademy.bookstore.dto.book.BookResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,7 +30,7 @@ public class Book {
             name = "author_book",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id"))
-    private List<Author> authors;
+    private List<Author> authors = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "publisher_id", referencedColumnName = "id")
@@ -48,5 +50,9 @@ public class Book {
             name = "genre_book",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-    private List<Genre> genres;
+    private List<Genre> genres = new ArrayList<>();
+
+    public BookResponse toBookDto() {
+        return new BookResponse();
+    }
 }

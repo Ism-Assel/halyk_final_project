@@ -19,7 +19,7 @@ public class AuthorController {
     }
 
     @GetMapping
-    public List<AuthorDTO> getAll() {
+    public ResponseEntity getAll() {
         return authorService.readAll();
     }
 

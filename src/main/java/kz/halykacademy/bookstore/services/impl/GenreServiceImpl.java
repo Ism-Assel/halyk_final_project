@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
 
@@ -107,11 +106,12 @@ public class GenreServiceImpl implements GenreService {
     }
 
     @Override
-    public List<GenreDTO> readAll() {
-        return genreRepository.findAll()
-                .stream()
-                .map(genreConvertor::convertToGenreDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity readAll() {
+//        return genreRepository.findAll()
+//                .stream()
+//                .map(genreConvertor::convertToGenreDTO)
+//                .collect(Collectors.toList());
+        return null;
     }
 
     @Override

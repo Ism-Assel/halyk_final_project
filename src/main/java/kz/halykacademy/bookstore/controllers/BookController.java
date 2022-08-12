@@ -19,7 +19,7 @@ public class BookController {
     }
 
     @GetMapping
-    public List<BookDTO> getAll() {
+    public ResponseEntity getAll() {
         return bookService.readAll();
     }
 

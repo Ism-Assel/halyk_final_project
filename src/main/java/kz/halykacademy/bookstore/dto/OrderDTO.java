@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.List;
 
+@Deprecated
 @Data
 public class OrderDTO {
     private Long id;
