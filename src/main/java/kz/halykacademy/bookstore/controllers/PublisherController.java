@@ -44,6 +44,5 @@ public class PublisherController {
     @GetMapping("/searchByName")
     public ResponseEntity getByName(@RequestParam(name = "name") String name) {
         return publisherService.findByNameLike(name);
-
     }
 }

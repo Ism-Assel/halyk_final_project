@@ -12,6 +12,7 @@ import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.PublisherRepository;
 import kz.halykacademy.bookstore.services.BookService;
 import kz.halykacademy.bookstore.utils.BlockedUserChecker;
+import kz.halykacademy.bookstore.utils.convertor.BookConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,28 +25,27 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
+import static kz.halykacademy.bookstore.utils.MessageInfo.*;
 
 @Service
 @Transactional
 public class BookServiceImpl implements BookService {
-    private final String MESSAGE_NOT_FOUND = "Book is not found with id = %d";
-    private final String MESSAGE_SUCCESS = "success";
-    private final String MESSAGE_EXISTED = "This book is existed";
-    private final String MESSAGE_LIST_BOOKS = "List of books are empty";
-
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
+    private final BookConvertor bookConvertor;
 
     @Autowired
     public BookServiceImpl(
             BookRepository bookRepository,
             AuthorRepository authorRepository,
-            PublisherRepository publisherRepository
+            PublisherRepository publisherRepository,
+            BookConvertor bookConvertor
     ) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.publisherRepository = publisherRepository;
+        this.bookConvertor = bookConvertor;
     }
 
     @Override
@@ -60,7 +60,6 @@ public class BookServiceImpl implements BookService {
         if (foundBook.isEmpty()) {
             // если нет, то создаем
             List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
-
             Optional<Publisher> publisher = publisherRepository.findById(request.getPublisherId());
 
             Book book = new Book(
@@ -78,11 +77,11 @@ public class BookServiceImpl implements BookService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(book.toBookDto());
+                    .body(bookConvertor.toBookDto(book));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_EXISTED);
+            throw new ClientBadRequestException(MESSAGE_BOOK_EXISTED);
         }
     }
 
@@ -96,10 +95,10 @@ public class BookServiceImpl implements BookService {
 
         if (foundBook.isEmpty()) {
             // Если не найдена книга
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
         }
 
-        return new ResponseEntity(foundBook.map(Book::toBookDto).get(), HttpStatus.OK);
+        return new ResponseEntity(foundBook.map(bookConvertor::toBookDto).get(), HttpStatus.OK);
     }
 
     @Override
@@ -114,7 +113,7 @@ public class BookServiceImpl implements BookService {
 
         return new ResponseEntity(
                 books.stream()
-                        .map(Book::toBookDto)
+                        .map(bookConvertor::toBookDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -129,7 +128,6 @@ public class BookServiceImpl implements BookService {
         if (foundBook.isPresent()) {
             // Если найден, обновляем книгу
             List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
-
             Optional<Publisher> publisher = publisherRepository.findById(request.getPublisherId());
 
             Book book = new Book(
@@ -147,11 +145,11 @@ public class BookServiceImpl implements BookService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(book.toBookDto());
+                    .body(bookConvertor.toBookDto(book));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
         }
     }
 
@@ -172,7 +170,7 @@ public class BookServiceImpl implements BookService {
                     .body(new ModelResponseDTO(MESSAGE_SUCCESS));
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
         }
     }
 
@@ -192,7 +190,7 @@ public class BookServiceImpl implements BookService {
 
         return new ResponseEntity(
                 books.stream()
-                        .map(Book::toBookDto)
+                        .map(bookConvertor::toBookDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -211,7 +209,7 @@ public class BookServiceImpl implements BookService {
 
         return new ResponseEntity(
                 books.stream()
-                        .map(Book::toBookDto)
+                        .map(bookConvertor::toBookDto)
                         .collect(Collectors.toSet()),
                 HttpStatus.OK);
     }

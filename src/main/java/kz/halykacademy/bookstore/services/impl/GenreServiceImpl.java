@@ -12,6 +12,7 @@ import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.repositories.GenreRepository;
 import kz.halykacademy.bookstore.services.GenreService;
 import kz.halykacademy.bookstore.utils.BlockedUserChecker;
+import kz.halykacademy.bookstore.utils.convertor.GenreConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,27 +24,27 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
+import static kz.halykacademy.bookstore.utils.MessageInfo.*;
 
 @Service
 @Transactional
 public class GenreServiceImpl implements GenreService {
-    private final String MESSAGE_NOT_FOUND = "Genre is not found with id = %d";
-    private final String MESSAGE_SUCCESS = "success";
-    private final String MESSAGE_EXISTED = "This genre is existed";
-    private final String MESSAGE_LIST_GENRES = "List of genres are empty";
-
     private final GenreRepository genreRepository;
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
+    private final GenreConvertor genreConvertor;
 
     @Autowired
-    public GenreServiceImpl(GenreRepository genreRepository,
-                            AuthorRepository authorRepository,
-                            BookRepository bookRepository
+    public GenreServiceImpl(
+            GenreRepository genreRepository,
+            AuthorRepository authorRepository,
+            BookRepository bookRepository,
+            GenreConvertor genreConvertor
     ) {
         this.genreRepository = genreRepository;
         this.authorRepository = authorRepository;
         this.bookRepository = bookRepository;
+        this.genreConvertor = genreConvertor;
     }
 
     @Override
@@ -51,13 +52,12 @@ public class GenreServiceImpl implements GenreService {
         // проверка параметров запроса
         checkParameters(request);
 
-        // Поиск автора в БД
+        // Поиск жанра в БД
         Optional<Genre> foundGenre = genreRepository.findByName(request.getName());
 
         // Проверка существует ли жанр
         if (foundGenre.isEmpty()) {
             // если нет, то создаем
-
             List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
             List<Book> books = bookRepository.findBookByIdIn(request.getBooksId());
 
@@ -72,11 +72,11 @@ public class GenreServiceImpl implements GenreService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(genre.toGenreDto());
+                    .body(genreConvertor.toGenreDto(genre));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_EXISTED);
+            throw new ClientBadRequestException(MESSAGE_GENRE_EXISTED);
         }
     }
 
@@ -90,10 +90,10 @@ public class GenreServiceImpl implements GenreService {
 
         if (foundGenre.isEmpty()) {
             // Если не найден жанр
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
         }
 
-        return new ResponseEntity(foundGenre.map(Genre::toGenreDto).get(), HttpStatus.OK);
+        return new ResponseEntity(foundGenre.map(genreConvertor::toGenreDto).get(), HttpStatus.OK);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class GenreServiceImpl implements GenreService {
 
         return new ResponseEntity(
                 genres.stream()
-                        .map(Genre::toGenreDto)
+                        .map(genreConvertor::toGenreDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -136,11 +136,11 @@ public class GenreServiceImpl implements GenreService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(genre.toGenreDto());
+                    .body(genreConvertor.toGenreDto(genre));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
         }
     }
 
@@ -161,7 +161,7 @@ public class GenreServiceImpl implements GenreService {
                     .body(new ModelResponseDTO(MESSAGE_SUCCESS));
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
         }
     }
 

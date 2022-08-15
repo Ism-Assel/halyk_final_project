@@ -1,6 +1,6 @@
 package kz.halykacademy.bookstore.controllers;
 
-import kz.halykacademy.bookstore.dto.AuthenticationRequest;
+import kz.halykacademy.bookstore.dto.auth.AuthenticationRequest;
 import kz.halykacademy.bookstore.services.impl.AuthServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

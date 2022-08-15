@@ -1,6 +1,5 @@
 package kz.halykacademy.bookstore.models;
 
-import kz.halykacademy.bookstore.dto.publisher.PublisherResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,11 +28,4 @@ public class Publisher {
     @OneToMany(mappedBy = "publisher")
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private List<Book> books = new ArrayList<>();
-
-    public PublisherResponse toPublisherDto() {
-        return new PublisherResponse(
-                this.id,
-                this.name
-        );
-    }
 }

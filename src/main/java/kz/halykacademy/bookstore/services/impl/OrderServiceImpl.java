@@ -14,6 +14,7 @@ import kz.halykacademy.bookstore.repositories.OrderRepository;
 import kz.halykacademy.bookstore.repositories.UserRepository;
 import kz.halykacademy.bookstore.services.OrderService;
 import kz.halykacademy.bookstore.utils.BlockedUserChecker;
+import kz.halykacademy.bookstore.utils.convertor.OrderConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,32 +26,27 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
+import static kz.halykacademy.bookstore.utils.MessageInfo.*;
 
 @Service
 @Transactional
 public class OrderServiceImpl implements OrderService {
-    private final String MESSAGE_NOT_FOUND = "Order is not found with id = %d";
-    private final String MESSAGE_SUCCESS = "success";
-    private final String MESSAGE_EXISTED = "This order is existed";
-    private final String MESSAGE_ORDER_PRICE = "Order price should not be greater than 10000 tg. Total price of order is: %.2f";
-    private final Double MAX_PRICE = 10000.0;
-    private final String MESSAGE_USER_NOT_FOUND = "User is not found with id = %d";
-    private final String MESSAGE_IS_BLOCKED = "User is blocked";
-    private final String MESSAGE_LIST_ORDERS = "List of orders are empty";
-
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final OrderConvertor orderConvertor;
 
     @Autowired
     public OrderServiceImpl(
             OrderRepository orderRepository,
             BookRepository bookRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            OrderConvertor orderConvertor
     ) {
         this.orderRepository = orderRepository;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.orderConvertor = orderConvertor;
     }
 
     @Override
@@ -69,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(order.toOrderDto());
+                .body(orderConvertor.toOrderDto(order));
     }
 
     public ResponseEntity readById(Long id) {
@@ -81,10 +77,10 @@ public class OrderServiceImpl implements OrderService {
 
         if (foundOrder.isEmpty()) {
             // Если не найден order
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_ORDER_NOT_FOUND, id));
         }
 
-        return new ResponseEntity(foundOrder.map(Order::toOrderDto).get(), HttpStatus.OK);
+        return new ResponseEntity(foundOrder.map(orderConvertor::toOrderDto).get(), HttpStatus.OK);
     }
 
     @Override
@@ -99,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
 
         return new ResponseEntity(
                 orders.stream()
-                        .map(Order::toOrderDto)
+                        .map(orderConvertor::toOrderDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -122,11 +118,11 @@ public class OrderServiceImpl implements OrderService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(order.toOrderDto());
+                    .body(orderConvertor.toOrderDto(order));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_ORDER_NOT_FOUND, id));
         }
     }
 
@@ -148,7 +144,7 @@ public class OrderServiceImpl implements OrderService {
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_ORDER_NOT_FOUND, id));
         }
     }
 
@@ -176,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
             totalPrice += book.getPrice();
         }
 
-        if (totalPrice > MAX_PRICE) {
+        if (totalPrice > MAX_PRICE_ORDER) {
             throw new ClientBadRequestException(String.format(MESSAGE_ORDER_PRICE, totalPrice));
         }
 
@@ -193,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if (order != null
-                && user.getRole().equals("USER")
+                && user.getRole().equals("ROLE_USER")
                 && !order.getUser().getId().equals(user.getId())
         ) {
             throw new ClientBadRequestException("This order doesn't access to the current user");

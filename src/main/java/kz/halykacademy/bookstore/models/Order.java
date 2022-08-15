@@ -1,8 +1,5 @@
 package kz.halykacademy.bookstore.models;
 
-import kz.halykacademy.bookstore.dto.book.BookResponse;
-import kz.halykacademy.bookstore.dto.order.OrderResponse;
-import kz.halykacademy.bookstore.dto.user.UserResponse;
 import kz.halykacademy.bookstore.models.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +11,6 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "order_")
@@ -46,27 +42,4 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
-
-    public OrderResponse toOrderDto() {
-        List<BookResponse> bookResponses = List.of();
-
-        if (this.books != null) {
-            bookResponses = this.books.stream().map(Book::toBookDto).collect(Collectors.toList());
-        }
-
-        UserResponse userResponse = new UserResponse(
-                user.getId(),
-                user.getLogin(),
-                user.getRole(),
-                user.getIsBlocked()
-        );
-
-        return new OrderResponse(
-                this.id,
-                bookResponses,
-                this.status.getId(),
-                this.createdAt,
-                userResponse
-        );
-    }
 }

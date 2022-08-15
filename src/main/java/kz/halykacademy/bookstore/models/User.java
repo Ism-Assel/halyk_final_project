@@ -1,6 +1,5 @@
 package kz.halykacademy.bookstore.models;
 
-import kz.halykacademy.bookstore.dto.user.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,14 +35,4 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Order> orders = new ArrayList<>();
-
-    public UserResponse toUserDto() {
-
-        return new UserResponse(
-                this.id,
-                this.login,
-                this.role,
-                this.isBlocked
-        );
-    }
 }

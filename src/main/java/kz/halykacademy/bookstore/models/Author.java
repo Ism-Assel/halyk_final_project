@@ -1,6 +1,5 @@
 package kz.halykacademy.bookstore.models;
 
-import kz.halykacademy.bookstore.dto.author.AuthorResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,14 +47,4 @@ public class Author {
             joinColumns = @JoinColumn(name = "author_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private List<Genre> genres = new ArrayList<>();
-
-    public AuthorResponse toAuthorDto() {
-        return new AuthorResponse(
-                this.id,
-                this.name,
-                this.surname,
-                this.lastname,
-                this.dateOfBirth
-        );
-    }
 }

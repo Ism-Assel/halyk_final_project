@@ -10,6 +10,7 @@ import kz.halykacademy.bookstore.repositories.AuthorRepository;
 import kz.halykacademy.bookstore.repositories.BookRepository;
 import kz.halykacademy.bookstore.services.AuthorService;
 import kz.halykacademy.bookstore.utils.BlockedUserChecker;
+import kz.halykacademy.bookstore.utils.convertor.AuthorConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,25 +21,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
+import static kz.halykacademy.bookstore.utils.MessageInfo.*;
 
 @Service
 @Transactional
 public class AuthorServiceImpl implements AuthorService {
-    private final String MESSAGE_NOT_FOUND = "Author is not found with id = %d";
-    private final String MESSAGE_SUCCESS = "success";
-    private final String MESSAGE_EXISTED = "This author is existed";
-    private final String MESSAGE_LIST_AUTHORS = "List of authors are empty";
-
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
+    private final AuthorConvertor authorConvertor;
 
     @Autowired
     public AuthorServiceImpl(
             AuthorRepository authorRepository,
-            BookRepository bookRepository
+            BookRepository bookRepository,
+            AuthorConvertor authorConvertor
     ) {
         this.authorRepository = authorRepository;
         this.bookRepository = bookRepository;
+        this.authorConvertor = authorConvertor;
     }
 
     @Override
@@ -70,11 +70,11 @@ public class AuthorServiceImpl implements AuthorService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(author.toAuthorDto());
+                    .body(authorConvertor.toAuthorDto(author));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_EXISTED);
+            throw new ClientBadRequestException(MESSAGE_AUTHOR_EXISTED);
         }
     }
 
@@ -88,10 +88,12 @@ public class AuthorServiceImpl implements AuthorService {
 
         if (foundAuthor.isEmpty()) {
             // Если не найден автор
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
         }
 
-        return new ResponseEntity(foundAuthor.map(Author::toAuthorDto).get(), HttpStatus.OK);
+        return new ResponseEntity(
+                foundAuthor.map(authorConvertor::toAuthorDto).get(),
+                HttpStatus.OK);
     }
 
     @Override
@@ -101,12 +103,13 @@ public class AuthorServiceImpl implements AuthorService {
 
         List<Author> authors = authorRepository.findAll();
         if (authors.isEmpty()) {
+            // Если список пуст
             throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
         }
 
         return new ResponseEntity(
                 authors.stream()
-                        .map(Author::toAuthorDto)
+                        .map(authorConvertor::toAuthorDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -134,11 +137,11 @@ public class AuthorServiceImpl implements AuthorService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(author.toAuthorDto());
+                    .body(authorConvertor.toAuthorDto(author));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
         }
     }
 
@@ -159,7 +162,7 @@ public class AuthorServiceImpl implements AuthorService {
                     .body(new ModelResponseDTO(MESSAGE_SUCCESS));
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
         }
     }
 
@@ -168,14 +171,18 @@ public class AuthorServiceImpl implements AuthorService {
         // проверяем заблокирован ли пользователь
         BlockedUserChecker.checkBlockedUser();
 
+        // Проверка параметра fio
         notNull(fio, "FIO is empty");
 
         List<Author> authors =
                 authorRepository.findAuthorByFIOLike(fio, fio, fio);
+        if (authors.isEmpty()) {
+            throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
+        }
 
         return new ResponseEntity(
                 authors.stream()
-                        .map(Author::toAuthorDto)
+                        .map(authorConvertor::toAuthorDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -197,7 +204,7 @@ public class AuthorServiceImpl implements AuthorService {
 
         return new ResponseEntity(
                 authors.stream()
-                        .map(Author::toAuthorDto)
+                        .map(authorConvertor::toAuthorDto)
                         .collect(Collectors.toList()),
                 HttpStatus.OK);
     }

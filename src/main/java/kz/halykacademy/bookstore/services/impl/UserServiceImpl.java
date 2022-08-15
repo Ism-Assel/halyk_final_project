@@ -7,6 +7,7 @@ import kz.halykacademy.bookstore.errors.ResourceNotFoundException;
 import kz.halykacademy.bookstore.models.User;
 import kz.halykacademy.bookstore.repositories.UserRepository;
 import kz.halykacademy.bookstore.services.UserService;
+import kz.halykacademy.bookstore.utils.convertor.UserConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,22 +20,24 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
+import static kz.halykacademy.bookstore.utils.MessageInfo.*;
 
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
-    private final String MESSAGE_NOT_FOUND = "User is not found with id = %d";
-    private final String MESSAGE_SUCCESS = "success";
-    private final String MESSAGE_EXISTED = "This user is existed";
-    private final String MESSAGE_LIST_USERS = "List of users are empty";
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserConvertor userConvertor;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            UserConvertor userConvertor
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userConvertor = userConvertor;
     }
 
     @Override
@@ -60,11 +63,11 @@ public class UserServiceImpl implements UserService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(user.toUserDto());
+                    .body(userConvertor.toUserDto(user));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_EXISTED);
+            throw new ClientBadRequestException(MESSAGE_USER_EXISTED);
         }
     }
 
@@ -75,10 +78,10 @@ public class UserServiceImpl implements UserService {
 
         if (foundUser.isEmpty()) {
             // Если не найден user
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
         }
 
-        return new ResponseEntity(foundUser.map(User::toUserDto).get(), HttpStatus.OK);
+        return new ResponseEntity(foundUser.map(userConvertor::toUserDto).get(), HttpStatus.OK);
     }
 
     @Override
@@ -90,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
         return new ResponseEntity(
                 users.stream()
-                        .map(User::toUserDto)
+                        .map(userConvertor::toUserDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -117,10 +120,10 @@ public class UserServiceImpl implements UserService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(user.toUserDto());
+                    .body(userConvertor.toUserDto(user));
 
         } else {
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
         }
     }
 
@@ -141,7 +144,7 @@ public class UserServiceImpl implements UserService {
                     .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
         } else {
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
         }
     }
 

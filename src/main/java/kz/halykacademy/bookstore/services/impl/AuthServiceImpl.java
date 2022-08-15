@@ -1,7 +1,7 @@
 package kz.halykacademy.bookstore.services.impl;
 
-import kz.halykacademy.bookstore.dto.AuthenticationRequest;
-import kz.halykacademy.bookstore.dto.AuthenticationResponse;
+import kz.halykacademy.bookstore.dto.auth.AuthenticationRequest;
+import kz.halykacademy.bookstore.dto.auth.AuthenticationResponse;
 import kz.halykacademy.bookstore.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

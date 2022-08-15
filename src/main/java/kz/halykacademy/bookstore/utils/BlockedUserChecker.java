@@ -12,7 +12,7 @@ public class BlockedUserChecker {
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         User user = userDetails.getUser();
 
-        if (user.getRole().equals("USER") && user.getIsBlocked()) {
+        if (user.getRole().equals("ROLE_USER") && user.getIsBlocked()) {
             throw new ForbiddenException("User is blocked");
         }
 

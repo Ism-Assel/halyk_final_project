@@ -1,4 +1,4 @@
-package kz.halykacademy.bookstore.dto;
+package kz.halykacademy.bookstore.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

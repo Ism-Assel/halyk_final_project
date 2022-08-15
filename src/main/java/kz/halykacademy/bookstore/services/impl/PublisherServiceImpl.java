@@ -8,6 +8,7 @@ import kz.halykacademy.bookstore.models.Publisher;
 import kz.halykacademy.bookstore.repositories.PublisherRepository;
 import kz.halykacademy.bookstore.services.PublisherService;
 import kz.halykacademy.bookstore.utils.BlockedUserChecker;
+import kz.halykacademy.bookstore.utils.convertor.PublisherConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,20 +20,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static kz.halykacademy.bookstore.utils.AssertUtil.notNull;
+import static kz.halykacademy.bookstore.utils.MessageInfo.*;
 
 @Service
 @Transactional
 public class PublisherServiceImpl implements PublisherService {
-    private final String MESSAGE_NOT_FOUND = "Publisher is not found with id = %d";
-    private final String MESSAGE_SUCCESS = "success";
-    private final String MESSAGE_EXISTED = "This publisher is existed";
-    private final String MESSAGE_LIST_PUBLISHERS = "List of publishers are empty";
-
     private final PublisherRepository publisherRepository;
+    private final PublisherConvertor publisherConvertor;
 
     @Autowired
-    public PublisherServiceImpl(PublisherRepository publisherRepository) {
+    public PublisherServiceImpl(PublisherRepository publisherRepository,
+                                PublisherConvertor publisherConvertor
+    ) {
         this.publisherRepository = publisherRepository;
+        this.publisherConvertor = publisherConvertor;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class PublisherServiceImpl implements PublisherService {
         // проверка параметров запроса
         checkParameters(request);
 
-        // Поиск автора в БД
+        // Поиск издателя в БД
         Optional<Publisher> foundPublisher = publisherRepository.findByName(
                 request.getName());
 
@@ -57,11 +58,11 @@ public class PublisherServiceImpl implements PublisherService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(publisher.toPublisherDto());
+                    .body(publisherConvertor.toPublisherDto(publisher));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_EXISTED);
+            throw new ClientBadRequestException(MESSAGE_PUBLISHER_EXISTED);
         }
     }
 
@@ -75,10 +76,10 @@ public class PublisherServiceImpl implements PublisherService {
 
         if (foundPublisher.isEmpty()) {
             // Если не найден издатель
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
         }
 
-        return new ResponseEntity(foundPublisher.map(Publisher::toPublisherDto).get(), HttpStatus.OK);
+        return new ResponseEntity(foundPublisher.map(publisherConvertor::toPublisherDto).get(), HttpStatus.OK);
     }
 
     @Override
@@ -88,12 +89,13 @@ public class PublisherServiceImpl implements PublisherService {
 
         List<Publisher> publishers = publisherRepository.findAll();
         if (publishers.isEmpty()) {
+            // Если список пуст
             throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
         }
 
         return new ResponseEntity(
                 publishers.stream()
-                        .map(Publisher::toPublisherDto)
+                        .map(publisherConvertor::toPublisherDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -117,11 +119,11 @@ public class PublisherServiceImpl implements PublisherService {
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(publisher.toPublisherDto());
+                    .body(publisherConvertor.toPublisherDto(publisher));
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
         }
     }
 
@@ -143,7 +145,7 @@ public class PublisherServiceImpl implements PublisherService {
 
         } else {
             // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_NOT_FOUND, id));
+            throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
         }
     }
 
@@ -152,6 +154,7 @@ public class PublisherServiceImpl implements PublisherService {
         // проверяем заблокирован ли пользователь
         BlockedUserChecker.checkBlockedUser();
 
+        // Проверка параметра запроса
         notNull(name, "Name is undefined");
 
         List<Publisher> publishers = publisherRepository.findByNameLikeIgnoreCase("%" + name + "%");
@@ -161,7 +164,7 @@ public class PublisherServiceImpl implements PublisherService {
 
         return new ResponseEntity(
                 publishers.stream()
-                        .map(Publisher::toPublisherDto)
+                        .map(publisherConvertor::toPublisherDto)
                         .collect(Collectors.toList()), HttpStatus.OK);
     }
 
