@@ -49,119 +49,124 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public ResponseEntity create(GenreRequest request) {
-        // проверка параметров запроса
-        checkParameters(request);
+        try {
+            // проверка параметров запроса
+            checkParameters(request);
 
-        // Поиск жанра в БД
-        Optional<Genre> foundGenre = genreRepository.findByName(request.getName());
+            // Поиск жанра в БД
+            Optional<Genre> foundGenre = genreRepository.findByName(request.getName());
 
-        // Проверка существует ли жанр
-        if (foundGenre.isEmpty()) {
-            // если нет, то создаем
-            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
-            List<Book> books = bookRepository.findBookByIdIn(request.getBooksId());
+            // Проверка существует ли жанр
+            if (foundGenre.isEmpty()) {
+                // если нет, то создаем
+                Genre genre = prepareGenre(request);
 
-            Genre genre = new Genre(
-                    request.getId(),
-                    request.getName(),
-                    authors,
-                    books
-            );
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(genreConvertor.toGenreDto(genre));
 
-            genre = genreRepository.save(genre);
-
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(genreConvertor.toGenreDto(genre));
-
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_GENRE_EXISTED);
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ClientBadRequestException(MESSAGE_GENRE_EXISTED);
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity readById(Long id) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        // Поиск жанра по id
-        Optional<Genre> foundGenre = genreRepository.findById(id);
+            // Поиск жанра по id
+            Optional<Genre> foundGenre = genreRepository.findById(id);
 
-        if (foundGenre.isEmpty()) {
-            // Если не найден жанр
-            throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
+            if (foundGenre.isEmpty()) {
+                // Если не найден жанр, выводим сообщение
+                throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
+            }
+
+            return new ResponseEntity(foundGenre.map(genreConvertor::toGenreDto).get(), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(foundGenre.map(genreConvertor::toGenreDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        List<Genre> genres = genreRepository.findAll();
-        if (genres.isEmpty()) {
-            throw new ClientBadRequestException(MESSAGE_LIST_GENRES);
+            // поиск жанров в БД
+            List<Genre> genres = genreRepository.findAll();
+
+            if (genres.isEmpty()) {
+                // если лист пуст, выводим сообщение
+                throw new ClientBadRequestException(MESSAGE_LIST_GENRES);
+            }
+
+            return new ResponseEntity(
+                    genres.stream()
+                            .map(genreConvertor::toGenreDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                genres.stream()
-                        .map(genreConvertor::toGenreDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity update(Long id, GenreRequest request) {
-        // проверка параметров запроса
-        checkParameters(id, request);
+        try {
+            // проверка параметров запроса
+            checkParameters(id, request);
 
-        // Поиск жанра по id
-        Optional<Genre> foundGenre = genreRepository.findById(id);
+            // Поиск жанра по id
+            Optional<Genre> foundGenre = genreRepository.findById(id);
 
-        if (foundGenre.isPresent()) {
-            // Если найден, обновляем жанр
-            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
-            List<Book> books = bookRepository.findBookByIdIn(request.getBooksId());
+            if (foundGenre.isPresent()) {
+                // Если найден, обновляем жанр
+                Genre genre = prepareGenre(request);
 
-            Genre genre = new Genre(
-                    request.getId(),
-                    request.getName(),
-                    authors,
-                    books
-            );
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(genreConvertor.toGenreDto(genre));
 
-            genre = genreRepository.save(genre);
-
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(genreConvertor.toGenreDto(genre));
-
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity delete(Long id) {
-        // Проверка параметра id
-        notNull(id, "Id is undefined");
+        try {
+            // Проверка параметра id
+            notNull(id, "Id is undefined");
 
-        // Поиск жанра по Id
-        Optional<Genre> foundGenre = genreRepository.findById(id);
+            // Поиск жанра по Id
+            Optional<Genre> foundGenre = genreRepository.findById(id);
 
-        if (foundGenre.isPresent()) {
-            // если нашли, удаляем
-            genreRepository.deleteById(id);
+            if (foundGenre.isPresent()) {
+                // если нашли, удаляем
+                genreRepository.deleteById(id);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_GENRE_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
@@ -178,5 +183,19 @@ public class GenreServiceImpl implements GenreService {
     protected void checkParameters(Long id, GenreRequest request) {
         notNull(id, "Id is undefined");
         checkParameters(request);
+    }
+
+    protected Genre prepareGenre(GenreRequest request) {
+        List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
+        List<Book> books = bookRepository.findBookByIdIn(request.getBooksId());
+
+        Genre genre = new Genre(
+                request.getId(),
+                request.getName(),
+                authors,
+                books
+        );
+
+        return genreRepository.save(genre);
     }
 }

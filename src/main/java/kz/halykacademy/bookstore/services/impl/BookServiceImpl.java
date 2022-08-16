@@ -50,168 +50,182 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public ResponseEntity create(BookRequest request) {
-        // проверка параметров запроса
-        checkParameters(request);
+        try {
+            // проверка параметров запроса
+            checkParameters(request);
 
-        // Поиск книги в БД
-        Optional<Book> foundBook = bookRepository.findByTitle(request.getTitle());
+            // Поиск книги в БД
+            Optional<Book> foundBook = bookRepository.findByTitle(request.getTitle());
 
-        // Проверка существует ли книга
-        if (foundBook.isEmpty()) {
-            // если нет, то создаем
-            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
-            Optional<Publisher> publisher = publisherRepository.findById(request.getPublisherId());
+            // Проверка существует ли книга
+            if (foundBook.isEmpty()) {
+                // если нет, то создаем и сохраняем
+                Book book = prepareBook(request);
 
-            Book book = new Book(
-                    request.getId(),
-                    request.getPrice(),
-                    authors,
-                    publisher.get(),
-                    request.getTitle(),
-                    request.getPages(),
-                    request.getPublicationYear(),
-                    null
-            );
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(bookConvertor.toBookDto(book));
 
-            book = bookRepository.save(book);
-
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(bookConvertor.toBookDto(book));
-
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_BOOK_EXISTED);
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ClientBadRequestException(MESSAGE_BOOK_EXISTED);
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity readById(Long id) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        // Поиск книги по id
-        Optional<Book> foundBook = bookRepository.findById(id);
+            // Поиск книги по id
+            Optional<Book> foundBook = bookRepository.findById(id);
 
-        if (foundBook.isEmpty()) {
-            // Если не найдена книга
-            throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
+            if (foundBook.isEmpty()) {
+                // Если не найдена книга, выводим сообщение
+                throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
+            }
+
+            return new ResponseEntity(foundBook.map(bookConvertor::toBookDto).get(), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(foundBook.map(bookConvertor::toBookDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        List<Book> books = bookRepository.findAll();
-        if (books.isEmpty()) {
-            throw new ClientBadRequestException(MESSAGE_LIST_BOOKS);
+            // поиск книг в БД
+            List<Book> books = bookRepository.findAll();
+
+            if (books.isEmpty()) {
+                // если пуст список, выводим сообщение
+                throw new ClientBadRequestException(MESSAGE_LIST_BOOKS);
+            }
+
+            return new ResponseEntity(
+                    books.stream()
+                            .map(bookConvertor::toBookDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                books.stream()
-                        .map(bookConvertor::toBookDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity update(Long id, BookRequest request) {
-        // проверка параметров запроса
-        checkParameters(id, request);
+        try {
+            // проверка параметров запроса
+            checkParameters(id, request);
 
-        // Поиск книги по id
-        Optional<Book> foundBook = bookRepository.findById(id);
+            // Поиск книги по id
+            Optional<Book> foundBook = bookRepository.findById(id);
 
-        if (foundBook.isPresent()) {
-            // Если найден, обновляем книгу
-            List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
-            Optional<Publisher> publisher = publisherRepository.findById(request.getPublisherId());
+            if (foundBook.isPresent()) {
+                // Если найден, обновляем книгу
+                Book book = prepareBook(request);
 
-            Book book = new Book(
-                    request.getId(),
-                    request.getPrice(),
-                    authors,
-                    publisher.get(),
-                    request.getTitle(),
-                    request.getPages(),
-                    request.getPublicationYear(),
-                    null
-            );
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(bookConvertor.toBookDto(book));
 
-            book = bookRepository.save(book);
-
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(bookConvertor.toBookDto(book));
-
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity delete(Long id) {
-        // Проверка параметра id
-        notNull(id, "Id is undefined");
+        try {
+            // Проверка параметра id
+            notNull(id, "Id is undefined");
 
-        // Поиск книги по Id
-        Optional<Book> book = bookRepository.findById(id);
+            // Поиск книги по Id
+            Optional<Book> book = bookRepository.findById(id);
 
-        if (book.isPresent()) {
-            // если нашли, удаляем
-            bookRepository.deleteById(id);
+            if (book.isPresent()) {
+                // если нашли, удаляем
+                bookRepository.deleteById(id);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_BOOK_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity findByTitle(String title) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        notNull(title, "Title is undefined");
+            // проверка параметров запроса
+            notNull(title, "Title is undefined");
 
-        List<Book> books = bookRepository
-                .findByTitleLikeIgnoreCase("%" + title + "%");
+            // поиск книг по названию в БД
+            List<Book> books = bookRepository
+                    .findByTitleLikeIgnoreCase(title);
 
-        if (books.isEmpty()) {
-            throw new ClientBadRequestException(MESSAGE_LIST_BOOKS);
+            if (books.isEmpty()) {
+                // если список пуст, выводим сообщение
+                throw new ClientBadRequestException(MESSAGE_LIST_BOOKS);
+            }
+
+            return new ResponseEntity(
+                    books.stream()
+                            .map(bookConvertor::toBookDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                books.stream()
-                        .map(bookConvertor::toBookDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity findByGenres(String genres) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        String[] genresAsArray = genres.split(",");
-        genresAsArray =
-                Arrays.stream(genresAsArray)
-                        .map(String::trim)
-                        .toArray(String[]::new);
+            // создаем массив жанров, разделенный запятой
+            String[] genresAsArray = genres.split(",");
 
-        List<Book> books = bookRepository.findBookByGenres(genresAsArray);
+            // удаление пробелов в каждом элементе массива
+            genresAsArray =
+                    Arrays.stream(genresAsArray)
+                            .map(String::trim)
+                            .toArray(String[]::new);
 
-        return new ResponseEntity(
-                books.stream()
-                        .map(bookConvertor::toBookDto)
-                        .collect(Collectors.toSet()),
-                HttpStatus.OK);
+            // поиск книг по жанрам в БД
+            List<Book> books = bookRepository.findBookByGenres(genresAsArray);
+
+            return new ResponseEntity(
+                    books.stream()
+                            .map(bookConvertor::toBookDto)
+                            .collect(Collectors.toSet()),
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     protected void checkParameters(BookRequest request) {
@@ -228,5 +242,23 @@ public class BookServiceImpl implements BookService {
     protected void checkParameters(Long id, BookRequest request) {
         notNull(id, "Id is undefined");
         checkParameters(request);
+    }
+
+    protected Book prepareBook(BookRequest request){
+        List<Author> authors = authorRepository.findAuthorByIdIn(request.getAuthorsId());
+        Optional<Publisher> publisher = publisherRepository.findById(request.getPublisherId());
+
+        Book book = new Book(
+                request.getId(),
+                request.getPrice(),
+                authors,
+                publisher.get(),
+                request.getTitle(),
+                request.getPages(),
+                request.getPublicationYear(),
+                null
+        );
+
+        return bookRepository.save(book);
     }
 }

@@ -8,11 +8,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class BlockedUserChecker {
     public static User checkBlockedUser() {
+        // достаем пользователя из Spring security системы
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         User user = userDetails.getUser();
 
+        // проверяем роль и статус пользователя
         if (user.getRole().equals("ROLE_USER") && user.getIsBlocked()) {
+            // если пользователь заблочен то выводим сообщение
             throw new ForbiddenException("User is blocked");
         }
 

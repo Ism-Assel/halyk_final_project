@@ -42,109 +42,136 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity create(UserRequest request) {
-        // проверка параметров запроса
-        checkParameters(request);
+        try {
+            // проверка параметров запроса
+            checkParameters(request);
 
-        // Поиск user в БД
-        Optional<User> foundUser = userRepository.findByLogin(request.getLogin());
+            // Поиск user в БД
+            Optional<User> foundUser = userRepository.findByLogin(request.getLogin());
 
-        // Проверка существует ли user
-        if (foundUser.isEmpty()) {
-            User user = new User(
-                    request.getId(),
-                    request.getLogin(),
-                    passwordEncoder.encode(request.getPassword()),
-                    request.getRole().toUpperCase(),
-                    request.getIsBlocked(),
-                    null
-            );
+            // Проверка существует ли user
+            if (foundUser.isEmpty()) {
+                User user = new User(
+                        request.getId(),
+                        request.getLogin(),
+                        passwordEncoder.encode(request.getPassword()),
+                        request.getRole().toUpperCase(),
+                        request.getIsBlocked(),
+                        null
+                );
 
-            user = userRepository.save(user);
+                user = userRepository.save(user);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(userConvertor.toUserDto(user));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(userConvertor.toUserDto(user));
 
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_USER_EXISTED);
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ClientBadRequestException(MESSAGE_USER_EXISTED);
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity readById(Long id) {
-        // Поиск user по id
-        Optional<User> foundUser = userRepository.findById(id);
+        try {
+            // Поиск user по id
+            Optional<User> foundUser = userRepository.findById(id);
 
-        if (foundUser.isEmpty()) {
-            // Если не найден user
-            throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
+            if (foundUser.isEmpty()) {
+                // Если не найден user, выводим сообщение
+                throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
+            }
+
+            return new ResponseEntity(foundUser.map(userConvertor::toUserDto).get(), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(foundUser.map(userConvertor::toUserDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-        List<User> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            throw new ClientBadRequestException(MESSAGE_LIST_USERS);
-        }
+        try {
+            // поиск пользователей в БД
+            List<User> users = userRepository.findAll();
 
-        return new ResponseEntity(
-                users.stream()
-                        .map(userConvertor::toUserDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
+            if (users.isEmpty()) {
+                // если список пуст, выводим сообщение
+                throw new ClientBadRequestException(MESSAGE_LIST_USERS);
+            }
+
+            return new ResponseEntity(
+                    users.stream()
+                            .map(userConvertor::toUserDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @Override
     public ResponseEntity update(Long id, UserRequest request) {
-        // проверка параметров запроса
-        checkParameters(id, request);
+        try {
+            // проверка параметров запроса
+            checkParameters(id, request);
 
-        // Поиск user по id
-        Optional<User> foundUser = userRepository.findById(id);
+            // Поиск user по id
+            Optional<User> foundUser = userRepository.findById(id);
 
-        if (foundUser.isPresent()) {
-            // Если найден, обновляем user
-            User user = new User(
-                    request.getId(),
-                    request.getLogin(),
-                    passwordEncoder.encode(request.getPassword()),
-                    request.getRole().toUpperCase(),
-                    request.getIsBlocked(),
-                    null
-            );
+            if (foundUser.isPresent()) {
+                // Если найден, обновляем user
+                User user = new User(
+                        request.getId(),
+                        request.getLogin(),
+                        passwordEncoder.encode(request.getPassword()),
+                        request.getRole().toUpperCase(),
+                        request.getIsBlocked(),
+                        null
+                );
 
-            user = userRepository.save(user);
+                user = userRepository.save(user);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(userConvertor.toUserDto(user));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(userConvertor.toUserDto(user));
 
-        } else {
-            throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity delete(Long id) {
-        // Проверка параметра id
-        notNull(id, "Id is undefined");
+        try {
+            // Проверка параметра id
+            notNull(id, "Id is undefined");
 
-        // Поиск user по id
-        Optional<User> foundUser = userRepository.findById(id);
+            // Поиск user по id
+            Optional<User> foundUser = userRepository.findById(id);
 
-        if (foundUser.isPresent()) {
-            // если нашли, удаляем
-            userRepository.deleteById(id);
+            if (foundUser.isPresent()) {
+                // если нашли, удаляем
+                userRepository.deleteById(id);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
-        } else {
-            throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_USER_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 

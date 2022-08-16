@@ -29,8 +29,9 @@ public class PublisherServiceImpl implements PublisherService {
     private final PublisherConvertor publisherConvertor;
 
     @Autowired
-    public PublisherServiceImpl(PublisherRepository publisherRepository,
-                                PublisherConvertor publisherConvertor
+    public PublisherServiceImpl(
+            PublisherRepository publisherRepository,
+            PublisherConvertor publisherConvertor
     ) {
         this.publisherRepository = publisherRepository;
         this.publisherConvertor = publisherConvertor;
@@ -38,134 +39,166 @@ public class PublisherServiceImpl implements PublisherService {
 
     @Override
     public ResponseEntity create(PublisherRequest request) {
-        // проверка параметров запроса
-        checkParameters(request);
+        try {
+            // проверка параметров запроса
+            checkParameters(request);
 
-        // Поиск издателя в БД
-        Optional<Publisher> foundPublisher = publisherRepository.findByName(
-                request.getName());
+            // Поиск издателя в БД
+            Optional<Publisher> foundPublisher = publisherRepository.findByName(
+                    request.getName());
 
-        // Проверка существует ли автор
-        if (foundPublisher.isEmpty()) {
-            // если нет, то создаем
-            Publisher publisher = new Publisher(
-                    request.getId(),
-                    request.getName(),
-                    null
-            );
+            // Проверка существует ли автор
+            if (foundPublisher.isEmpty()) {
+                // если нет, то создаем
+                Publisher publisher = new Publisher(
+                        request.getId(),
+                        request.getName(),
+                        null
+                );
 
-            publisher = publisherRepository.save(publisher);
+                publisher = publisherRepository.save(publisher);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(publisherConvertor.toPublisherDto(publisher));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(publisherConvertor.toPublisherDto(publisher));
 
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_PUBLISHER_EXISTED);
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ClientBadRequestException(MESSAGE_PUBLISHER_EXISTED);
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity readById(Long id) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        // Поиск издателя по id
-        Optional<Publisher> foundPublisher = publisherRepository.findById(id);
+            // Поиск издателя по id
+            Optional<Publisher> foundPublisher = publisherRepository.findById(id);
 
-        if (foundPublisher.isEmpty()) {
-            // Если не найден издатель
-            throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
+            if (foundPublisher.isEmpty()) {
+                // Если не найден издатель, выводим сообщение
+                throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
+            }
+
+            return new ResponseEntity(foundPublisher.map(publisherConvertor::toPublisherDto).get(), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(foundPublisher.map(publisherConvertor::toPublisherDto).get(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        List<Publisher> publishers = publisherRepository.findAll();
-        if (publishers.isEmpty()) {
-            // Если список пуст
-            throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
+            // поиск издателей в БД
+            List<Publisher> publishers = publisherRepository.findAll();
+
+            if (publishers.isEmpty()) {
+                // Если список пуст, выводим сообщение
+                throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
+            }
+
+            return new ResponseEntity(
+                    publishers.stream()
+                            .map(publisherConvertor::toPublisherDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                publishers.stream()
-                        .map(publisherConvertor::toPublisherDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity update(Long id, PublisherRequest request) {
-        // проверка параметров запроса
-        checkParameters(id, request);
+        try {
+            // проверка параметров запроса
+            checkParameters(id, request);
 
-        // Поиск издателя по id
-        Optional<Publisher> foundPublisher = publisherRepository.findById(id);
+            // Поиск издателя по id
+            Optional<Publisher> foundPublisher = publisherRepository.findById(id);
 
-        if (foundPublisher.isPresent()) {
-            // Если найден, обновляем издателя
-            Publisher publisher = new Publisher(
-                    request.getId(),
-                    request.getName(),
-                    null
-            );
+            if (foundPublisher.isPresent()) {
+                // Если найден, обновляем издателя
+                Publisher publisher = new Publisher(
+                        request.getId(),
+                        request.getName(),
+                        null
+                );
 
-            publisher = publisherRepository.save(publisher);
+                publisher = publisherRepository.save(publisher);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(publisherConvertor.toPublisherDto(publisher));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(publisherConvertor.toPublisherDto(publisher));
 
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity delete(Long id) {
-        // Проверка параметра id
-        notNull(id, "Id is undefined");
+        try {
+            // Проверка параметра id
+            notNull(id, "Id is undefined");
 
-        // Поиск издателя по id
-        Optional<Publisher> foundPublisher = publisherRepository.findById(id);
+            // Поиск издателя по id
+            Optional<Publisher> foundPublisher = publisherRepository.findById(id);
 
-        if (foundPublisher.isPresent()) {
-            // если нашли, удаляем
-            publisherRepository.deleteById(id);
+            if (foundPublisher.isPresent()) {
+                // если нашли, удаляем
+                publisherRepository.deleteById(id);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ModelResponseDTO(MESSAGE_SUCCESS));
 
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_PUBLISHER_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity findByNameLike(String name) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        // Проверка параметра запроса
-        notNull(name, "Name is undefined");
+            // Проверка параметра запроса
+            notNull(name, "Name is undefined");
 
-        List<Publisher> publishers = publisherRepository.findByNameLikeIgnoreCase("%" + name + "%");
-        if (publishers.isEmpty()) {
-            throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
+            // поиск издателей по имени в БД
+            List<Publisher> publishers = publisherRepository.findByNameLikeIgnoreCase(name);
+
+            if (publishers.isEmpty()) {
+                // если лист пуст, выводим сообщение пользователю
+                throw new ClientBadRequestException(MESSAGE_LIST_PUBLISHERS);
+            }
+
+            return new ResponseEntity(
+                    publishers.stream()
+                            .map(publisherConvertor::toPublisherDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                publishers.stream()
-                        .map(publisherConvertor::toPublisherDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     protected void checkParameters(Long id, PublisherRequest request) {

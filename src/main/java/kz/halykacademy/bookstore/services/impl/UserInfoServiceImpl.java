@@ -22,11 +22,18 @@ public class UserInfoServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByLogin(login);
-        if (user.isEmpty()) {
-            throw new UsernameNotFoundException("User not found!");
-        }
+        try {
+            // поиск пользователя по логину в БД
+            Optional<User> user = userRepository.findByLogin(login);
+            if (user.isEmpty()) {
+                // если не найден, выводим сообщение
+                throw new UsernameNotFoundException("User not found!");
+            }
 
-        return new UserDetailsImpl(user.get());
+            return new UserDetailsImpl(user.get());
+
+        } catch (Exception e) {
+            throw e;
+        }
     }
 }

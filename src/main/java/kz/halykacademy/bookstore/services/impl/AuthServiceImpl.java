@@ -23,19 +23,24 @@ public class AuthServiceImpl {
     }
 
     public ResponseEntity login(AuthenticationRequest request) {
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword());
-
         try {
-            authenticationManager.authenticate(authToken);
-        } catch (BadCredentialsException e) {
-            throw new BadCredentialsException(e.getMessage());
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword());
+
+            try {
+                authenticationManager.authenticate(authToken);
+            } catch (BadCredentialsException e) {
+                throw new BadCredentialsException(e.getMessage());
+            }
+
+            String token = jwtUtil.generateToken(request.getLogin());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new AuthenticationResponse(token));
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        String token = jwtUtil.generateToken(request.getLogin());
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new AuthenticationResponse(token));
     }
 }

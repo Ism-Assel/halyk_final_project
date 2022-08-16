@@ -12,7 +12,8 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    List<Book> findByTitleLikeIgnoreCase(String title);
+    @Query(value = "select b from Book b where lower(b.title) like concat('%', lower(:title), '%')")
+    List<Book> findByTitleLikeIgnoreCase(@Param("title") String title);
 
     @Query(value = "select b from Book b join b.genres g where g.name in :genres order by g.name ")
     List<Book> findBookByGenres(@Param("genres") String[] genres);

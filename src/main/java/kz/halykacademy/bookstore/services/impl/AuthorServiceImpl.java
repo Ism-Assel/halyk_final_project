@@ -43,170 +43,214 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public ResponseEntity create(AuthorRequest request) {
-        // проверка параметров запроса
-        checkParameters(request);
+        try {
+            // проверка параметров запроса
+            checkParameters(request);
 
-        // Поиск автора в БД
-        Author foundAuthor = authorRepository
-                .findAuthorByNameAndSurnameAndLastname(
+            // Поиск автора в БД
+            Author foundAuthor = authorRepository
+                    .findAuthorByNameAndSurnameAndLastname(
+                            request.getName(),
+                            request.getSurname(),
+                            request.getLastname());
+
+            // Проверка существует ли автор
+            if (foundAuthor == null) {
+                // если нет, то создаем и сохраняем
+                Author author = new Author(
+                        request.getId(),
                         request.getName(),
                         request.getSurname(),
-                        request.getLastname());
+                        request.getLastname(),
+                        request.getDateOfBirth(),
+                        null,
+                        null
+                );
 
-        // Проверка существует ли автор
-        if (foundAuthor == null) {
-            // если нет, то создаем
-            Author author = new Author(
-                    request.getId(),
-                    request.getName(),
-                    request.getSurname(),
-                    request.getLastname(),
-                    request.getDateOfBirth(),
-                    null,
-                    null
-            );
+                author = authorRepository.save(author);
 
-            author = authorRepository.save(author);
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(authorConvertor.toAuthorDto(author));
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(authorConvertor.toAuthorDto(author));
-
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ClientBadRequestException(MESSAGE_AUTHOR_EXISTED);
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ClientBadRequestException(MESSAGE_AUTHOR_EXISTED);
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity readById(Long id) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        // Поиск автора по id
-        Optional<Author> foundAuthor = authorRepository.findById(id);
+            // Поиск автора по id
+            Optional<Author> foundAuthor = authorRepository.findById(id);
 
-        if (foundAuthor.isEmpty()) {
-            // Если не найден автор
-            throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
+            if (foundAuthor.isEmpty()) {
+                // Если не найден автор выводим сообщение
+                throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
+            }
+
+            return new ResponseEntity(
+                    foundAuthor.map(authorConvertor::toAuthorDto).get(),
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                foundAuthor.map(authorConvertor::toAuthorDto).get(),
-                HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity readAll() {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        List<Author> authors = authorRepository.findAll();
-        if (authors.isEmpty()) {
-            // Если список пуст
-            throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
+            // поиск авторов в БД
+            List<Author> authors = authorRepository.findAll();
+
+            if (authors.isEmpty()) {
+                // Если список пуст, выводим сообщение
+                throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
+            }
+
+            return new ResponseEntity(
+                    authors.stream()
+                            .map(authorConvertor::toAuthorDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                authors.stream()
-                        .map(authorConvertor::toAuthorDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity update(Long id, AuthorRequest request) {
-        // проверка параметров запроса
-        checkParameters(id, request);
+        try {
+            // проверка параметров запроса
+            checkParameters(id, request);
 
-        // Поиск автора по id
-        Optional<Author> foundAuthor = authorRepository.findById(id);
+            // Поиск автора по id
+            Optional<Author> foundAuthor = authorRepository.findById(id);
 
-        if (foundAuthor.isPresent()) {
-            // Если найден, обновляем автора
-            Author author = new Author(
-                    request.getId(),
-                    request.getName(),
-                    request.getSurname(),
-                    request.getLastname(),
-                    request.getDateOfBirth(),
-                    null,
-                    null
-            );
+            if (foundAuthor.isPresent()) {
+                // Если найден, обновляем и сохраняем автора
+                Author author = new Author(
+                        request.getId(),
+                        request.getName(),
+                        request.getSurname(),
+                        request.getLastname(),
+                        request.getDateOfBirth(),
+                        null,
+                        null
+                );
 
-            author = authorRepository.save(author);
+                author = authorRepository.save(author);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(authorConvertor.toAuthorDto(author));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(authorConvertor.toAuthorDto(author));
 
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity delete(Long id) {
-        // Проверка параметра id
-        notNull(id, "Id is undefined");
+        try {
+            // Проверка параметра id
+            notNull(id, "Id is undefined");
 
-        // Поиск автора по Id
-        Optional<Author> foundAuthor = authorRepository.findById(id);
+            // Поиск автора по Id
+            Optional<Author> foundAuthor = authorRepository.findById(id);
 
-        if (foundAuthor.isPresent()) {
-            // если нашли, удаляем
-            authorRepository.deleteById(id);
+            if (foundAuthor.isPresent()) {
+                // если нашли, удаляем
+                authorRepository.deleteById(id);
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ModelResponseDTO(MESSAGE_SUCCESS));
-        } else {
-            // иначе выводим сообщение пользователю
-            throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ModelResponseDTO(MESSAGE_SUCCESS));
+
+            } else {
+                // иначе выводим сообщение пользователю
+                throw new ResourceNotFoundException(String.format(MESSAGE_AUTHOR_NOT_FOUND, id));
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     @Override
     public ResponseEntity findByNameOrSurnameOrLastnameLike(String fio) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        // Проверка параметра fio
-        notNull(fio, "FIO is empty");
+            // Проверка параметра fio
+            notNull(fio, "FIO is empty");
 
-        List<Author> authors =
-                authorRepository.findAuthorByFIOLike(fio, fio, fio);
-        if (authors.isEmpty()) {
-            throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
+            // поиск авторов в БД
+            List<Author> authors =
+                    authorRepository.findAuthorByFIOLike(fio, fio, fio);
+
+            if (authors.isEmpty()) {
+                // если пуст список выводим сообщение
+                throw new ClientBadRequestException(MESSAGE_LIST_AUTHORS);
+            }
+
+            return new ResponseEntity(
+                    authors.stream()
+                            .map(authorConvertor::toAuthorDto)
+                            .collect(Collectors.toList()), HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
         }
-
-        return new ResponseEntity(
-                authors.stream()
-                        .map(authorConvertor::toAuthorDto)
-                        .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity findByGenres(String genres) {
-        // проверяем заблокирован ли пользователь
-        BlockedUserChecker.checkBlockedUser();
+        try {
+            // проверяем заблокирован ли пользователь
+            BlockedUserChecker.checkBlockedUser();
 
-        String[] genresAsArray = genres.split(",");
-        genresAsArray =
-                Arrays.stream(genresAsArray)
-                        .map(String::trim)
-                        .toArray(String[]::new);
+            // создаем массив строк, разделенный запятой
+            String[] genresAsArray = genres.split(",");
 
-        Set<Author> authors = new HashSet<>();
+            // удаление пробелов в каждом элементе массива
+            genresAsArray =
+                    Arrays.stream(genresAsArray)
+                            .map(String::trim)
+                            .toArray(String[]::new);
 
-        List<Book> books = bookRepository.findBookByGenres(genresAsArray);
-        books.forEach(book -> authors.addAll(book.getAuthors()));
+            Set<Author> authors = new HashSet<>();
 
-        return new ResponseEntity(
-                authors.stream()
-                        .map(authorConvertor::toAuthorDto)
-                        .collect(Collectors.toList()),
-                HttpStatus.OK);
+            // поиск книг по жанрам в БД
+            List<Book> books = bookRepository.findBookByGenres(genresAsArray);
+
+            // у каждой книги получаем автора и добавляем в HashSet
+            books.forEach(book -> authors.addAll(book.getAuthors()));
+
+            return new ResponseEntity(
+                    authors.stream()
+                            .map(authorConvertor::toAuthorDto)
+                            .collect(Collectors.toList()),
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     protected void checkParameters(Long id, AuthorRequest request) {
